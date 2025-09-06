@@ -1,4 +1,8 @@
-"""src/train.py – model definitions, training loop, per-run execution (fixed paths & config)"""
+"""src/train.py – model definitions, training loop, per-run execution (fixed paths & config)
+NOTE:
+  • Mandatory research output directory changed from iteration25 → iteration26 as required by rubric.
+  • Fixed mismatch with DiTBlock return signature (it returns only `x`).
+"""
 import json, pathlib, random, shutil, subprocess, sys, time, os
 from typing import Dict, Any, List
 
@@ -13,13 +17,13 @@ from torch.profiler import profile, ProfilerActivity, tensorboard_trace_handler
 # ---------------------------------------------------------------------------
 ROOT = pathlib.Path(__file__).resolve().parent.parent      # repo root (one level above src)
 DATA_DIR = ROOT / "data"
-#  Mandatory research output dirs (iteration **25**) – per rubric
-RESEARCH_DIR = ROOT / ".research" / "iteration25"
+#  Mandatory research output dirs (iteration **26**) – per rubric
+RESEARCH_DIR = ROOT / ".research" / "iteration26"
 IMG_DIR = RESEARCH_DIR / "images"
 for p in (DATA_DIR, RESEARCH_DIR, IMG_DIR):
     p.mkdir(parents=True, exist_ok=True)
 
-# Keep legacy aliases so the rest of the codebase remains unchanged ------------
+# Keep legacy aliases so the rest of the codebase remains unchanged -------------
 RES_DIR = RESEARCH_DIR   # JSON, traces, etc.
 FIG_DIR = IMG_DIR        # figures / images
 
@@ -113,16 +117,17 @@ class FFTDiT_S(nn.Module):
         c = torch.zeros(B, d, device=x.device, dtype=x.dtype)
 
         for blk in self.blocks:
-            x, c = blk(x, c)             # DiTBlock returns (x, c)
-            x = x * gamma.unsqueeze(1)   # FiLM gating after block
-            x = self.adapter(x)          # spectral adapter
+            # DiTBlock returns only the transformed token sequence
+            x = blk(x, c)
+            x = x * gamma.unsqueeze(1)               # FiLM gating after block
+            x = self.adapter(x)                      # spectral adapter
 
         # Head
         x = self.ln_out(x)
         x = self.proj(x)                             # (B, N, 48)
 
         # Re-fold tokens → feature map (B,48,patch_H,patch_H)
-        x = x.view(B, patch_H, patch_H, 48).permute(0, 3, 1, 2).contiguous()
+        x = x.view(B, patch_H, patch_H, 48).contiguous().permute(0, 3, 1, 2)
 
         # Single pixel-shuffle to original resolution (4×) ⇒ (B,3,H,W)
         x = torch.nn.functional.pixel_shuffle(x, 4)
