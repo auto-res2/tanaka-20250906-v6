@@ -1,0 +1,9 @@
+# Default user-editable configuration for FFT-DiT experiments
+exp: exp1          # currently only exp1 is available
+seed: 13
+num_seeds: 3
+device: cuda       # set to "cpu" for debugging
+
+# Training hyper-parameters
+img_size: 256
+global_batch: 2048

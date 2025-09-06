@@ -1,1 +1,28 @@
-# Please list the required python packages.
+[tool.poetry]
+name = "fft-dit-research"
+version = "0.1.0"
+description = "Research code for FFT-DiT diffusion model experiments"
+authors = ["Researcher <research@example.com>"]
+readme = "README.md"
+packages = [
+    { include = "src" }
+]
+
+[tool.poetry.dependencies]
+python = "^3.10"
+torch = "^2.0"
+torchvision = "^0.15"
+diffusers = "^0.25"
+flash-fft-conv = "*"
+webdataset = "^0.2"
+requests = "^2.31"
+pyyaml = "^6.0"
+torch-fidelity = "^0.3"
+open-clip-torch = "^2.24"
+matplotlib = "^3.8"
+seaborn = "^0.13"
+tqdm = "^4.66"
+
+[build-system]
+requires = ["poetry-core>=1.5.0"]
+build-backend = "poetry.core.masonry.api"
