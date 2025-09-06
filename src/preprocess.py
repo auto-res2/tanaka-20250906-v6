@@ -1,9 +1,9 @@
-"""src/preprocess.py – dataset downloading, preprocessing, reproducibility helpers (fixed paths)"""
+"""src/preprocess.py – dataset downloading, preprocessing helpers (fixed paths)"""
 import pathlib, random, yaml
 from typing import Tuple
 
 import torch, torchvision
-from torch.utils.data import DataLoader
+from torch.utils.data import DataLoader, Dataset
 from datasets import load_dataset
 
 # -----------------  paths / config  ----------------------------
@@ -26,6 +26,30 @@ _transform = torchvision.transforms.Compose([
     torchvision.transforms.Normalize([0.5, 0.5, 0.5], [0.5, 0.5, 0.5]),
 ])
 
+# -----------------  custom dataset wrapper  --------------------
+class HFDataset(Dataset):
+    """Thin wrapper converting a HF dataset row → tensor dict usable by PyTorch."""
+    def __init__(self, hf_ds):
+        self.hf_ds = hf_ds
+        # figure out the image column name dynamically
+        if "img" in hf_ds.column_names:
+            self.img_key = "img"
+        elif "image" in hf_ds.column_names:
+            self.img_key = "image"
+        else:
+            raise KeyError("Supported image column not found in dataset (expected 'img' or 'image').")
+
+    def __len__(self):
+        return len(self.hf_ds)
+
+    def __getitem__(self, idx):
+        example = self.hf_ds[int(idx)]
+        img = _transform(example[self.img_key].convert("RGB"))
+        label = int(example["label"])
+        return {"x": img, "y": torch.tensor(label, dtype=torch.long)}
+
+# -----------------  public API  --------------------------------
+
 def build_dataloaders(*, batch: int, seed: int, cfg: dict):
     """Download (if necessary) the mini-ImageNet set from HuggingFace and build train/val loaders."""
     try:
@@ -36,17 +60,8 @@ def build_dataloaders(*, batch: int, seed: int, cfg: dict):
     ds = ds.train_test_split(test_size=cfg["dataset"]["val_split"], seed=seed)
     train_ds, val_ds = ds["train"], ds["test"]
 
-    def _map(example):
-        img = _transform(example["img"].convert("RGB"))
-        label = int(example["label"])
-        return {"x": img, "y": torch.tensor(label, dtype=torch.long)}
-
-    train_ds.set_transform(_map)
-    val_ds.set_transform(_map)
-
-    g = torch.Generator().manual_seed(seed)
-    train_loader = DataLoader(train_ds, batch_size=batch, shuffle=True, num_workers=8, drop_last=True, generator=g, pin_memory=True)
-    val_loader = DataLoader(val_ds, batch_size=batch, shuffle=False, num_workers=4, pin_memory=True)
+    train_loader = DataLoader(HFDataset(train_ds), batch_size=batch, shuffle=True, num_workers=8, drop_last=True, pin_memory=True)
+    val_loader = DataLoader(HFDataset(val_ds), batch_size=batch, shuffle=False, num_workers=4, pin_memory=True)
     return train_loader, val_loader
 
 # -----------------  reproducibility  ---------------------------

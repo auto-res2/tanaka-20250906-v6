@@ -1,5 +1,5 @@
 """src/train.py – model definitions, training loop, per-run execution (fixed paths & config)"""
-import json, pathlib, random, shutil, subprocess, sys, time, math, os
+import json, pathlib, random, shutil, subprocess, sys, time, os
 from typing import Dict, Any, List
 
 import torch, yaml, numpy as np
@@ -14,7 +14,7 @@ from torch.profiler import profile, ProfilerActivity, tensorboard_trace_handler
 ROOT = pathlib.Path(__file__).resolve().parent.parent      # repo root (one level above src)
 DATA_DIR = ROOT / "data"
 #  Mandatory research output dirs (see task description)
-RESEARCH_DIR = ROOT / ".research" / "iteration20"
+RESEARCH_DIR = ROOT / ".research" / "iteration21"
 IMG_DIR = RESEARCH_DIR / "images"
 for p in (DATA_DIR, RESEARCH_DIR, IMG_DIR):
     p.mkdir(parents=True, exist_ok=True)
@@ -79,11 +79,11 @@ class FFTDiT_S(nn.Module):
         depth = cfg["depth"]
         heads = cfg["heads"]
         self.adapter_rank = cfg["adapter_rank"]
-        img_size = cfg["img_size"]
+        self.img_size = cfg["img_size"]
 
         # Stem – 4×4 patch embed (like ViT/DiT)
         self.patch_embed = nn.Conv2d(3, d, kernel_size=4, stride=4)
-        self.pos = nn.Parameter(torch.randn(1, (img_size // 4) ** 2, d) * 0.02)
+        self.pos = nn.Parameter(torch.randn(1, (self.img_size // 4) ** 2, d) * 0.02)
 
         # Hyper-network for FiLM gating
         self.hyper = HyperNet(hidden=d, dim=d)
@@ -92,13 +92,14 @@ class FFTDiT_S(nn.Module):
         self.blocks = nn.ModuleList([DiTBlock(d, heads) for _ in range(depth)])
         self.adapter = SpectralAdapter(d, self.adapter_rank)  # shared across layers
 
-        # Output – predict noise ε per patch then PixelShuffle
+        # Output – predict noise ε per patch (48 dims per patch → 3×4×4)
         self.ln_out = nn.LayerNorm(d)
         self.proj = nn.Linear(d, 3 * 4 * 4)
 
     def forward(self, x: torch.Tensor, t: torch.Tensor):
         """x ∈ [-1,1]  (B,3,H,W) ;  t ∈ [0,1]  (B,)"""
         B = x.size(0)
+        patch_H = self.img_size // 4
         x = self.patch_embed(x)                      # (B, d, H/4, W/4)
         x = x.flatten(2).transpose(1, 2) + self.pos  # (B, N, d)
         gamma = self.hyper(t)                        # (B, d)
@@ -107,10 +108,13 @@ class FFTDiT_S(nn.Module):
             x = x * gamma.unsqueeze(1)               # FiLM gating
             x = self.adapter(x)                      # spectral adapter
         x = self.ln_out(x)
-        x = self.proj(x).view(B, -1, 1, 1)           # → (B, 48, 1, 1)
-        # upscale back to image resolution (4× pixel_shuffle twice)
-        x = torch.nn.functional.pixel_shuffle(x, 2)  # 1st upscale → (B,12,2,2)
-        x = torch.nn.functional.pixel_shuffle(x, 2)  # 2nd upscale → (B,3,4,4)
+        x = self.proj(x)                             # (B, N, 48)
+
+        # Re-fold tokens → feature map (B,48,patch_H,patch_H)
+        x = x.view(B, patch_H, patch_H, 48).permute(0, 3, 1, 2).contiguous()
+
+        # Single pixel-shuffle to original resolution (4×) ⇒ (B,3,H,W)
+        x = torch.nn.functional.pixel_shuffle(x, 4)
         return x
 
 

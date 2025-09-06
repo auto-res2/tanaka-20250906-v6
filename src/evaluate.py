@@ -10,7 +10,7 @@ import seaborn as sns
 
 # ----------  paths & config  ------------------------------------------------
 ROOT = pathlib.Path(__file__).resolve().parent.parent
-RESEARCH_DIR = ROOT / ".research" / "iteration20"
+RESEARCH_DIR = ROOT / ".research" / "iteration21"
 IMG_DIR = RESEARCH_DIR / "images"
 for p in (RESEARCH_DIR, IMG_DIR):
     p.mkdir(parents=True, exist_ok=True)
@@ -21,7 +21,7 @@ CFG = yaml.safe_load(CFG_FILE.read_text())
 # ----------  FID evaluation  ------------------------------------------------
 
 def evaluate_fid(model, val_loader, scheduler, cfg: Dict[str, Any]):
-    """Generate 10 k images with DDIM-style loop (20 steps) and compute FID."""
+    """Generate 10 k images with a 20-step DDPM sampling loop and compute FID."""
     model.eval()
     imgs = []
     total_needed = 10000
@@ -35,7 +35,7 @@ def evaluate_fid(model, val_loader, scheduler, cfg: Dict[str, Any]):
                 t = torch.full((z.size(0),), i * 50, device=z.device)
                 with autocast(device_type="cuda", dtype=torch.bfloat16):
                     eps = model(z, t.float() / 1000.0)
-                alpha = scheduler.alphas_cumprod[t.long()][:, None, None, None].to(z.device)
+                alpha = scheduler.alphas_cumprod[t.long()].view(-1, 1, 1, 1).to(z.device)
                 z = (z - (1 - alpha).sqrt() * eps) / alpha.sqrt()
             imgs.append(z.detach().cpu())
 
