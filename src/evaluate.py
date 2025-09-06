@@ -1,5 +1,3 @@
-"""src/evaluate.py – evaluation utilities & plotting
-(updated to iteration31 paths + headless Agg backend)"""
 import json, pathlib, matplotlib
 from typing import Dict, List, Any
 
@@ -14,8 +12,8 @@ import seaborn as sns
 
 # ----------  paths & config  ------------------------------------------------
 ROOT = pathlib.Path(__file__).resolve().parent.parent
-RESEARCH_DIR = ROOT / ".research" / "iteration31"
-IMG_DIR = RESEARCH_DIR / "images"
+RESEARCH_DIR = ROOT / ".research" / "iteration32"  # UPDATED (iteration31 ➜ iteration32)
+IMG_DIR = RESEARCH_DIR / "images"                    # ensured below
 for p in (RESEARCH_DIR, IMG_DIR):
     p.mkdir(parents=True, exist_ok=True)
 
@@ -42,7 +40,7 @@ def evaluate_fid(model, val_loader, scheduler, cfg: Dict[str, Any]):
                 t = torch.full((z.size(0),), t_val, device=z.device)
                 with autocast("cuda", dtype=amp_dtype):
                     eps = model(z, t.float() / 1000.0)
-                alpha = scheduler.alphas_cumprod[t_val].to(z.device)  # scalar per step
+                alpha = scheduler.alphas_cumprod[t_val].to(z.device)
                 alpha = alpha.view(1, 1, 1, 1)
                 z = (z - (1 - alpha).sqrt() * eps) / alpha.sqrt()
             imgs.append(z.detach().cpu())
