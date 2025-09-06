@@ -1,4 +1,3 @@
-[UPDATED_FILE]
 """src/main.py – orchestrates the complete FFT-DiT experiment suite.
 Run with  :  python -m src.main
 """
@@ -90,7 +89,7 @@ def _single_run(model_key: str, seed: int) -> Dict[str, Any]:  # noqa: D401
         params=MODELS[model_key]["params"],
     )
 
-    # save individual result file – path changed to iteration4 automatically via RESULT_DIR import
+    # save individual result file – path changed to iteration5 automatically via RESULT_DIR import
     ts = int(time.time())
     out_path = RESULT_DIR / f"exp1_{DATASET_KEY}_{model_key}_s{seed}_{ts}.json"
     save_json(res, out_path)
