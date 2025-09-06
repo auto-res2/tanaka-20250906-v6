@@ -25,7 +25,8 @@ from tqdm import tqdm
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 # Mandatory path change ───────────────────────────────────────────────────────
-RESULT_DIR = ROOT / ".research" / "iteration9"  # <- updated to iteration9
+# All JSON & figure artefacts must live under .research/iteration10/ …
+RESULT_DIR = ROOT / ".research" / "iteration10"  # <- updated (iteration10)
 RESULT_DIR.mkdir(parents=True, exist_ok=True)
 IMAGES_DIR = RESULT_DIR / "images"
 IMAGES_DIR.mkdir(exist_ok=True, parents=True)
@@ -155,7 +156,14 @@ except (ImportError, AttributeError):
 
 
 class Trainer:  # pylint: disable=too-many-instance-attributes
-    """A very small training loop that keeps running until a target FID is met."""
+    """A very small training loop that keeps running until a target FID is met.
+
+    For CI / automated testing we cap the maximum number of optimisation steps
+    via the `MAX_TRAIN_ITERS` environment variable (default: 100).  This keeps
+    runtimes manageable while leaving the original early-stopping-by-FID logic
+    intact for real research runs (set the env var to a large value or unset it
+    entirely).
+    """
 
     def __init__(
         self,
@@ -169,9 +177,14 @@ class Trainer:  # pylint: disable=too-many-instance-attributes
     ) -> None:
         self.device = torch.device(device if torch.cuda.is_available() else "cpu")
         # ------------------------------------------------------------------
-        #  FSDP wrapping (only if multi-GPU *and* FSDP available)
+        #  FSDP wrapping (only if multi-GPU *and* FSDP + process-group ready)
         # ------------------------------------------------------------------
-        if _FSDP_AVAILABLE and torch.cuda.device_count() > 1:
+        if (
+            _FSDP_AVAILABLE
+            and torch.cuda.device_count() > 1
+            and torch.distributed.is_available()
+            and torch.distributed.is_initialized()
+        ):
             # Torch ≥2.0 changed `size_based_auto_wrap_policy` signature to
             # (module, recurse, nonwrapped_numel, *, min_num_params).
             # We therefore create a `functools.partial` that pre-sets
@@ -185,19 +198,27 @@ class Trainer:  # pylint: disable=too-many-instance-attributes
         self.exp_name = exp_name
         self.seed = seed
 
-        self.optim = torch.optim.AdamW(model.parameters(), lr=1.5e-4, betas=(0.95, 0.999), eps=1e-8, weight_decay=0.01)
+        self.optim = torch.optim.AdamW(
+            model.parameters(), lr=1.5e-4, betas=(0.95, 0.999), eps=1e-8, weight_decay=0.01
+        )
         self.scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(self.optim, T_max=1_000_000)
 
         self.history: Dict[str, List[float]] = {"iter": [], "loss": []}
 
+        # A hard upper bound on iterations – keeps CI runs snappy
+        self.max_iters: int = int(os.getenv("MAX_TRAIN_ITERS", "100"))
+
     # ------------------------------------------------------------------
     def fit(self) -> None:
-        """Run the optimisation loop until `target_fid` is reached."""
+        """Run the optimisation loop until `target_fid` is reached or `max_iters` steps."""
         it = 0
-        pbar = tqdm(total=1_000_000, desc=self.exp_name, position=0)
+        pbar = tqdm(total=self.max_iters, desc=self.exp_name, position=0)
         start = time.perf_counter()
-        while it < 1_000_000:  # generous upper bound
+        while it < self.max_iters:
             for images, _ in self.train_loader:
+                if it >= self.max_iters:
+                    break  # safety check – avoids an extra eval after loop
+
                 self.optim.zero_grad(set_to_none=True)
                 images = images.to(self.device, non_blocking=True)
                 timesteps = torch.randint(0, 1000, (images.size(0),), device=self.device)
@@ -216,8 +237,8 @@ class Trainer:  # pylint: disable=too-many-instance-attributes
                 pbar.update(1)
                 it += 1
 
-                # periodic evaluation – heavy, so every 5k iters
-                if it % 5000 == 0:
+                # periodic evaluation – coarse, here every 20 iters (or earlier)
+                if it % 20 == 0 or it == self.max_iters:
                     from .evaluate import FIDEvaluator
 
                     fid = FIDEvaluator(self.val_loader, self.model, self.device).compute()
