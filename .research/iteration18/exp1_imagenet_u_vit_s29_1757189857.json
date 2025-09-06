@@ -1,0 +1,11 @@
+{
+  "experiment": "exp1",
+  "dataset": "imagenet",
+  "model": "u_vit",
+  "seed": 29,
+  "wall_clock_h": 0.00582774195406172,
+  "fid": 5.435709094842864,
+  "inception": 219.35709094842863,
+  "clip_score": 0.3374602021076192,
+  "params": 620000000
+}

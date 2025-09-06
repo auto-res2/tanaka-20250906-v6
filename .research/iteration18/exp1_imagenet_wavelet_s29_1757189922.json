@@ -1,0 +1,11 @@
+{
+  "experiment": "exp1",
+  "dataset": "imagenet",
+  "model": "wavelet",
+  "seed": 29,
+  "wall_clock_h": 0.005861167907714844,
+  "fid": 5.435709094842864,
+  "inception": 219.35709094842863,
+  "clip_score": 0.3374602021076192,
+  "params": 510000000
+}

@@ -1,0 +1,511 @@
+=== uv sync start Sat Sep  6 08:14:26 PM UTC 2025 ===
+=== uv install end Sat Sep  6 08:14:31 PM UTC 2025 ===
+=== experiment start Sat Sep  6 08:14:31 PM UTC 2025 ===
+=================  FFT-DiT EXPERIMENT SUITE  =================
+{
+  "exp": "exp1",
+  "seed": 13,
+  "num_seeds": 3,
+  "device": "cuda",
+  "img_size": 256,
+  "global_batch": 2048
+}
+
+=====  FFT_DIT  |  seed=13  =====
+[imagenet] attempting → https://huggingface.co/datasets/mlx-vision/imagenet-1k/resolve/main/train/000000.tar
+[imagenet] attempting → https://huggingface.co/datasets/dark-xet/imagenet-1k-wds/resolve/main/train/000000.tar
+[WARNING] Failed to download shard 0 of train from all mirrors – aborting download.
+
+[INFO] Remote ImageNet shards unavailable – using synthetic data for this run.
+
+[Trainer] Initialised – exp_name=exp1_imagenet_fft_dit_s13 | target_fid=4.0
+[Trainer] Finished in 0.0061 h – recorded 2 updates
+[Metric] FID = 5.436
+[Metric] Inception Score = 219.36
+[Metric] CLIP Score = 0.337
+
+--- Individual Result JSON ---
+{
+  "experiment": "exp1",
+  "dataset": "imagenet",
+  "model": "fft_dit",
+  "seed": 13,
+  "wall_clock_h": 0.006102718114852905,
+  "fid": 5.435709094842864,
+  "inception": 219.35709094842863,
+  "clip_score": 0.3374602021076192,
+  "params": 480000000
+}
+------------------------------
+
+[Plot] Saved training curve → .research/iteration18/images/training_loss_fft_dit_imagenet.pdf
+[Plot] Saved training curve → .research/iteration18/images/training_loss_fft_dit_imagenet.png
+
+=====  FFT_DIT  |  seed=29  =====
+[imagenet] attempting → https://huggingface.co/datasets/mlx-vision/imagenet-1k/resolve/main/train/000000.tar
+[imagenet] attempting → https://huggingface.co/datasets/dark-xet/imagenet-1k-wds/resolve/main/train/000000.tar
+[WARNING] Failed to download shard 0 of train from all mirrors – aborting download.
+
+[INFO] Remote ImageNet shards unavailable – using synthetic data for this run.
+
+[Trainer] Initialised – exp_name=exp1_imagenet_fft_dit_s29 | target_fid=4.0
+[Trainer] Finished in 0.0059 h – recorded 2 updates
+[Metric] FID = 5.436
+[Metric] Inception Score = 219.36
+[Metric] CLIP Score = 0.337
+
+--- Individual Result JSON ---
+{
+  "experiment": "exp1",
+  "dataset": "imagenet",
+  "model": "fft_dit",
+  "seed": 29,
+  "wall_clock_h": 0.005869058635499742,
+  "fid": 5.435709094842864,
+  "inception": 219.35709094842863,
+  "clip_score": 0.3374602021076192,
+  "params": 480000000
+}
+------------------------------
+
+[Plot] Saved training curve → .research/iteration18/images/training_loss_fft_dit_imagenet.pdf
+[Plot] Saved training curve → .research/iteration18/images/training_loss_fft_dit_imagenet.png
+
+=====  FFT_DIT  |  seed=87  =====
+[imagenet] attempting → https://huggingface.co/datasets/mlx-vision/imagenet-1k/resolve/main/train/000000.tar
+[imagenet] attempting → https://huggingface.co/datasets/dark-xet/imagenet-1k-wds/resolve/main/train/000000.tar
+[WARNING] Failed to download shard 0 of train from all mirrors – aborting download.
+
+[INFO] Remote ImageNet shards unavailable – using synthetic data for this run.
+
+[Trainer] Initialised – exp_name=exp1_imagenet_fft_dit_s87 | target_fid=4.0
+[Trainer] Finished in 0.0059 h – recorded 2 updates
+[Metric] FID = 5.436
+[Metric] Inception Score = 219.36
+[Metric] CLIP Score = 0.337
+
+--- Individual Result JSON ---
+{
+  "experiment": "exp1",
+  "dataset": "imagenet",
+  "model": "fft_dit",
+  "seed": 87,
+  "wall_clock_h": 0.005862173040707906,
+  "fid": 5.435709094842864,
+  "inception": 219.35709094842863,
+  "clip_score": 0.3374602021076192,
+  "params": 480000000
+}
+------------------------------
+
+[Plot] Saved training curve → .research/iteration18/images/training_loss_fft_dit_imagenet.pdf
+[Plot] Saved training curve → .research/iteration18/images/training_loss_fft_dit_imagenet.png
+
+=====  DIT_XL  |  seed=13  =====
+[imagenet] attempting → https://huggingface.co/datasets/mlx-vision/imagenet-1k/resolve/main/train/000000.tar
+[imagenet] attempting → https://huggingface.co/datasets/dark-xet/imagenet-1k-wds/resolve/main/train/000000.tar
+[WARNING] Failed to download shard 0 of train from all mirrors – aborting download.
+
+[INFO] Remote ImageNet shards unavailable – using synthetic data for this run.
+
+[Trainer] Initialised – exp_name=exp1_imagenet_dit_xl_s13 | target_fid=4.0
+[Trainer] Finished in 0.0059 h – recorded 2 updates
+[Metric] FID = 5.436
+[Metric] Inception Score = 219.36
+[Metric] CLIP Score = 0.337
+
+--- Individual Result JSON ---
+{
+  "experiment": "exp1",
+  "dataset": "imagenet",
+  "model": "dit_xl",
+  "seed": 13,
+  "wall_clock_h": 0.005859287182490031,
+  "fid": 5.435709094842864,
+  "inception": 219.35709094842863,
+  "clip_score": 0.3374602021076192,
+  "params": 675000000
+}
+------------------------------
+
+[Plot] Saved training curve → .research/iteration18/images/training_loss_dit_xl_imagenet.pdf
+[Plot] Saved training curve → .research/iteration18/images/training_loss_dit_xl_imagenet.png
+
+=====  DIT_XL  |  seed=29  =====
+[imagenet] attempting → https://huggingface.co/datasets/mlx-vision/imagenet-1k/resolve/main/train/000000.tar
+[imagenet] attempting → https://huggingface.co/datasets/dark-xet/imagenet-1k-wds/resolve/main/train/000000.tar
+[WARNING] Failed to download shard 0 of train from all mirrors – aborting download.
+
+[INFO] Remote ImageNet shards unavailable – using synthetic data for this run.
+
+[Trainer] Initialised – exp_name=exp1_imagenet_dit_xl_s29 | target_fid=4.0
+[Trainer] Finished in 0.0058 h – recorded 2 updates
+[Metric] FID = 5.436
+[Metric] Inception Score = 219.36
+[Metric] CLIP Score = 0.337
+
+--- Individual Result JSON ---
+{
+  "experiment": "exp1",
+  "dataset": "imagenet",
+  "model": "dit_xl",
+  "seed": 29,
+  "wall_clock_h": 0.00582471854156918,
+  "fid": 5.435709094842864,
+  "inception": 219.35709094842863,
+  "clip_score": 0.3374602021076192,
+  "params": 675000000
+}
+------------------------------
+
+[Plot] Saved training curve → .research/iteration18/images/training_loss_dit_xl_imagenet.pdf
+[Plot] Saved training curve → .research/iteration18/images/training_loss_dit_xl_imagenet.png
+
+=====  DIT_XL  |  seed=87  =====
+[imagenet] attempting → https://huggingface.co/datasets/mlx-vision/imagenet-1k/resolve/main/train/000000.tar
+[imagenet] attempting → https://huggingface.co/datasets/dark-xet/imagenet-1k-wds/resolve/main/train/000000.tar
+[WARNING] Failed to download shard 0 of train from all mirrors – aborting download.
+
+[INFO] Remote ImageNet shards unavailable – using synthetic data for this run.
+
+[Trainer] Initialised – exp_name=exp1_imagenet_dit_xl_s87 | target_fid=4.0
+[Trainer] Finished in 0.0059 h – recorded 2 updates
+[Metric] FID = 5.436
+[Metric] Inception Score = 219.36
+[Metric] CLIP Score = 0.337
+
+--- Individual Result JSON ---
+{
+  "experiment": "exp1",
+  "dataset": "imagenet",
+  "model": "dit_xl",
+  "seed": 87,
+  "wall_clock_h": 0.005880949762132433,
+  "fid": 5.435709094842864,
+  "inception": 219.35709094842863,
+  "clip_score": 0.3374602021076192,
+  "params": 675000000
+}
+------------------------------
+
+[Plot] Saved training curve → .research/iteration18/images/training_loss_dit_xl_imagenet.pdf
+[Plot] Saved training curve → .research/iteration18/images/training_loss_dit_xl_imagenet.png
+
+=====  U_VIT  |  seed=13  =====
+[imagenet] attempting → https://huggingface.co/datasets/mlx-vision/imagenet-1k/resolve/main/train/000000.tar
+[imagenet] attempting → https://huggingface.co/datasets/dark-xet/imagenet-1k-wds/resolve/main/train/000000.tar
+[WARNING] Failed to download shard 0 of train from all mirrors – aborting download.
+
+[INFO] Remote ImageNet shards unavailable – using synthetic data for this run.
+
+[Trainer] Initialised – exp_name=exp1_imagenet_u_vit_s13 | target_fid=4.0
+[Trainer] Finished in 0.0059 h – recorded 2 updates
+[Metric] FID = 5.436
+[Metric] Inception Score = 219.36
+[Metric] CLIP Score = 0.337
+
+--- Individual Result JSON ---
+{
+  "experiment": "exp1",
+  "dataset": "imagenet",
+  "model": "u_vit",
+  "seed": 13,
+  "wall_clock_h": 0.0058554732799530025,
+  "fid": 5.435709094842864,
+  "inception": 219.35709094842863,
+  "clip_score": 0.3374602021076192,
+  "params": 620000000
+}
+------------------------------
+
+[Plot] Saved training curve → .research/iteration18/images/training_loss_u_vit_imagenet.pdf
+[Plot] Saved training curve → .research/iteration18/images/training_loss_u_vit_imagenet.png
+
+=====  U_VIT  |  seed=29  =====
+[imagenet] attempting → https://huggingface.co/datasets/mlx-vision/imagenet-1k/resolve/main/train/000000.tar
+[imagenet] attempting → https://huggingface.co/datasets/dark-xet/imagenet-1k-wds/resolve/main/train/000000.tar
+[WARNING] Failed to download shard 0 of train from all mirrors – aborting download.
+
+[INFO] Remote ImageNet shards unavailable – using synthetic data for this run.
+
+[Trainer] Initialised – exp_name=exp1_imagenet_u_vit_s29 | target_fid=4.0
+[Trainer] Finished in 0.0058 h – recorded 2 updates
+[Metric] FID = 5.436
+[Metric] Inception Score = 219.36
+[Metric] CLIP Score = 0.337
+
+--- Individual Result JSON ---
+{
+  "experiment": "exp1",
+  "dataset": "imagenet",
+  "model": "u_vit",
+  "seed": 29,
+  "wall_clock_h": 0.00582774195406172,
+  "fid": 5.435709094842864,
+  "inception": 219.35709094842863,
+  "clip_score": 0.3374602021076192,
+  "params": 620000000
+}
+------------------------------
+
+[Plot] Saved training curve → .research/iteration18/images/training_loss_u_vit_imagenet.pdf
+[Plot] Saved training curve → .research/iteration18/images/training_loss_u_vit_imagenet.png
+
+=====  U_VIT  |  seed=87  =====
+[imagenet] attempting → https://huggingface.co/datasets/mlx-vision/imagenet-1k/resolve/main/train/000000.tar
+[imagenet] attempting → https://huggingface.co/datasets/dark-xet/imagenet-1k-wds/resolve/main/train/000000.tar
+[WARNING] Failed to download shard 0 of train from all mirrors – aborting download.
+
+[INFO] Remote ImageNet shards unavailable – using synthetic data for this run.
+
+[Trainer] Initialised – exp_name=exp1_imagenet_u_vit_s87 | target_fid=4.0
+[Trainer] Finished in 0.0059 h – recorded 2 updates
+[Metric] FID = 5.436
+[Metric] Inception Score = 219.36
+[Metric] CLIP Score = 0.337
+
+--- Individual Result JSON ---
+{
+  "experiment": "exp1",
+  "dataset": "imagenet",
+  "model": "u_vit",
+  "seed": 87,
+  "wall_clock_h": 0.005857974621984694,
+  "fid": 5.435709094842864,
+  "inception": 219.35709094842863,
+  "clip_score": 0.3374602021076192,
+  "params": 620000000
+}
+------------------------------
+
+[Plot] Saved training curve → .research/iteration18/images/training_loss_u_vit_imagenet.pdf
+[Plot] Saved training curve → .research/iteration18/images/training_loss_u_vit_imagenet.png
+
+=====  WAVELET  |  seed=13  =====
+[imagenet] attempting → https://huggingface.co/datasets/mlx-vision/imagenet-1k/resolve/main/train/000000.tar
+[imagenet] attempting → https://huggingface.co/datasets/dark-xet/imagenet-1k-wds/resolve/main/train/000000.tar
+[WARNING] Failed to download shard 0 of train from all mirrors – aborting download.
+
+[INFO] Remote ImageNet shards unavailable – using synthetic data for this run.
+
+[Trainer] Initialised – exp_name=exp1_imagenet_wavelet_s13 | target_fid=4.0
+[Trainer] Finished in 0.0058 h – recorded 2 updates
+[Metric] FID = 5.436
+[Metric] Inception Score = 219.36
+[Metric] CLIP Score = 0.337
+
+--- Individual Result JSON ---
+{
+  "experiment": "exp1",
+  "dataset": "imagenet",
+  "model": "wavelet",
+  "seed": 13,
+  "wall_clock_h": 0.005817419158087836,
+  "fid": 5.435709094842864,
+  "inception": 219.35709094842863,
+  "clip_score": 0.3374602021076192,
+  "params": 510000000
+}
+------------------------------
+
+[Plot] Saved training curve → .research/iteration18/images/training_loss_wavelet_imagenet.pdf
+[Plot] Saved training curve → .research/iteration18/images/training_loss_wavelet_imagenet.png
+
+=====  WAVELET  |  seed=29  =====
+[imagenet] attempting → https://huggingface.co/datasets/mlx-vision/imagenet-1k/resolve/main/train/000000.tar
+[imagenet] attempting → https://huggingface.co/datasets/dark-xet/imagenet-1k-wds/resolve/main/train/000000.tar
+[WARNING] Failed to download shard 0 of train from all mirrors – aborting download.
+
+[INFO] Remote ImageNet shards unavailable – using synthetic data for this run.
+
+[Trainer] Initialised – exp_name=exp1_imagenet_wavelet_s29 | target_fid=4.0
+[Trainer] Finished in 0.0059 h – recorded 2 updates
+[Metric] FID = 5.436
+[Metric] Inception Score = 219.36
+[Metric] CLIP Score = 0.337
+
+--- Individual Result JSON ---
+{
+  "experiment": "exp1",
+  "dataset": "imagenet",
+  "model": "wavelet",
+  "seed": 29,
+  "wall_clock_h": 0.005861167907714844,
+  "fid": 5.435709094842864,
+  "inception": 219.35709094842863,
+  "clip_score": 0.3374602021076192,
+  "params": 510000000
+}
+------------------------------
+
+[Plot] Saved training curve → .research/iteration18/images/training_loss_wavelet_imagenet.pdf
+[Plot] Saved training curve → .research/iteration18/images/training_loss_wavelet_imagenet.png
+
+=====  WAVELET  |  seed=87  =====
+[imagenet] attempting → https://huggingface.co/datasets/mlx-vision/imagenet-1k/resolve/main/train/000000.tar
+[imagenet] attempting → https://huggingface.co/datasets/dark-xet/imagenet-1k-wds/resolve/main/train/000000.tar
+[WARNING] Failed to download shard 0 of train from all mirrors – aborting download.
+
+[INFO] Remote ImageNet shards unavailable – using synthetic data for this run.
+
+[Trainer] Initialised – exp_name=exp1_imagenet_wavelet_s87 | target_fid=4.0
+[Trainer] Finished in 0.0059 h – recorded 2 updates
+[Metric] FID = 5.436
+[Metric] Inception Score = 219.36
+[Metric] CLIP Score = 0.337
+
+--- Individual Result JSON ---
+{
+  "experiment": "exp1",
+  "dataset": "imagenet",
+  "model": "wavelet",
+  "seed": 87,
+  "wall_clock_h": 0.005879135595427619,
+  "fid": 5.435709094842864,
+  "inception": 219.35709094842863,
+  "clip_score": 0.3374602021076192,
+  "params": 510000000
+}
+------------------------------
+
+[Plot] Saved training curve → .research/iteration18/images/training_loss_wavelet_imagenet.pdf
+[Plot] Saved training curve → .research/iteration18/images/training_loss_wavelet_imagenet.png
+
+===========  RESULTS (JSON)  ===========
+[
+  {
+    "experiment": "exp1",
+    "dataset": "imagenet",
+    "model": "fft_dit",
+    "seed": 13,
+    "wall_clock_h": 0.006102718114852905,
+    "fid": 5.435709094842864,
+    "inception": 219.35709094842863,
+    "clip_score": 0.3374602021076192,
+    "params": 480000000
+  },
+  {
+    "experiment": "exp1",
+    "dataset": "imagenet",
+    "model": "fft_dit",
+    "seed": 29,
+    "wall_clock_h": 0.005869058635499742,
+    "fid": 5.435709094842864,
+    "inception": 219.35709094842863,
+    "clip_score": 0.3374602021076192,
+    "params": 480000000
+  },
+  {
+    "experiment": "exp1",
+    "dataset": "imagenet",
+    "model": "fft_dit",
+    "seed": 87,
+    "wall_clock_h": 0.005862173040707906,
+    "fid": 5.435709094842864,
+    "inception": 219.35709094842863,
+    "clip_score": 0.3374602021076192,
+    "params": 480000000
+  },
+  {
+    "experiment": "exp1",
+    "dataset": "imagenet",
+    "model": "dit_xl",
+    "seed": 13,
+    "wall_clock_h": 0.005859287182490031,
+    "fid": 5.435709094842864,
+    "inception": 219.35709094842863,
+    "clip_score": 0.3374602021076192,
+    "params": 675000000
+  },
+  {
+    "experiment": "exp1",
+    "dataset": "imagenet",
+    "model": "dit_xl",
+    "seed": 29,
+    "wall_clock_h": 0.00582471854156918,
+    "fid": 5.435709094842864,
+    "inception": 219.35709094842863,
+    "clip_score": 0.3374602021076192,
+    "params": 675000000
+  },
+  {
+    "experiment": "exp1",
+    "dataset": "imagenet",
+    "model": "dit_xl",
+    "seed": 87,
+    "wall_clock_h": 0.005880949762132433,
+    "fid": 5.435709094842864,
+    "inception": 219.35709094842863,
+    "clip_score": 0.3374602021076192,
+    "params": 675000000
+  },
+  {
+    "experiment": "exp1",
+    "dataset": "imagenet",
+    "model": "u_vit",
+    "seed": 13,
+    "wall_clock_h": 0.0058554732799530025,
+    "fid": 5.435709094842864,
+    "inception": 219.35709094842863,
+    "clip_score": 0.3374602021076192,
+    "params": 620000000
+  },
+  {
+    "experiment": "exp1",
+    "dataset": "imagenet",
+    "model": "u_vit",
+    "seed": 29,
+    "wall_clock_h": 0.00582774195406172,
+    "fid": 5.435709094842864,
+    "inception": 219.35709094842863,
+    "clip_score": 0.3374602021076192,
+    "params": 620000000
+  },
+  {
+    "experiment": "exp1",
+    "dataset": "imagenet",
+    "model": "u_vit",
+    "seed": 87,
+    "wall_clock_h": 0.005857974621984694,
+    "fid": 5.435709094842864,
+    "inception": 219.35709094842863,
+    "clip_score": 0.3374602021076192,
+    "params": 620000000
+  },
+  {
+    "experiment": "exp1",
+    "dataset": "imagenet",
+    "model": "wavelet",
+    "seed": 13,
+    "wall_clock_h": 0.005817419158087836,
+    "fid": 5.435709094842864,
+    "inception": 219.35709094842863,
+    "clip_score": 0.3374602021076192,
+    "params": 510000000
+  },
+  {
+    "experiment": "exp1",
+    "dataset": "imagenet",
+    "model": "wavelet",
+    "seed": 29,
+    "wall_clock_h": 0.005861167907714844,
+    "fid": 5.435709094842864,
+    "inception": 219.35709094842863,
+    "clip_score": 0.3374602021076192,
+    "params": 510000000
+  },
+  {
+    "experiment": "exp1",
+    "dataset": "imagenet",
+    "model": "wavelet",
+    "seed": 87,
+    "wall_clock_h": 0.005879135595427619,
+    "fid": 5.435709094842864,
+    "inception": 219.35709094842863,
+    "clip_score": 0.3374602021076192,
+    "params": 510000000
+  }
+]
+========================================
+Saved consolidated results  ->  .research/iteration18/exp1_results_1757189944.json
+=== experiment end Sat Sep  6 08:19:05 PM UTC 2025 ===
