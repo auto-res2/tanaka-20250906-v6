@@ -1,4 +1,4 @@
-"""src/main.py – single entry-point orchestrating the whole experiment (iteration29 paths)"""
+"""src/main.py – single entry-point orchestrating the whole experiment (iteration31 paths)"""
 import pathlib, sys, json, yaml, torch
 from typing import List, Dict, Any
 
@@ -14,8 +14,8 @@ ROOT = pathlib.Path(__file__).resolve().parent.parent
 CFG_FILE = ROOT / "config" / "config.yaml"
 CFG = yaml.safe_load(CFG_FILE.read_text())
 
-# research directories (iteration29)
-RESEARCH_DIR = ROOT / ".research" / "iteration29"
+# research directories (iteration31)
+RESEARCH_DIR = ROOT / ".research" / "iteration31"
 IMG_DIR = RESEARCH_DIR / "images"
 for p in (RESEARCH_DIR, IMG_DIR):
     p.mkdir(parents=True, exist_ok=True)

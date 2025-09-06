@@ -1,5 +1,5 @@
 """src/train.py – model definitions, training loop, per-run execution
-(updated to iteration29 paths + resilient AMP import)"""
+(updated to iteration31 paths + resilient AMP import)"""
 import json, pathlib, random, shutil, subprocess, sys, time, os, contextlib
 from typing import Dict, Any, List
 
@@ -18,11 +18,11 @@ from torch import autocast                       # torch.autocast("cuda", …)
 import torch.nn.functional as F
 
 # ---------------------------------------------------------------------------
-#  Repository paths (NOTE: iteration **29** as mandated)
+#  Repository paths (NOTE: iteration **31** as mandated)
 # ---------------------------------------------------------------------------
 ROOT = pathlib.Path(__file__).resolve().parent.parent      # repo root
 DATA_DIR = ROOT / "data"
-RESEARCH_DIR = ROOT / ".research" / "iteration29"
+RESEARCH_DIR = ROOT / ".research" / "iteration31"
 IMG_DIR = RESEARCH_DIR / "images"
 for p in (DATA_DIR, RESEARCH_DIR, IMG_DIR):
     p.mkdir(parents=True, exist_ok=True)

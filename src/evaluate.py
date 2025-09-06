@@ -1,5 +1,5 @@
 """src/evaluate.py – evaluation utilities & plotting
-(updated to iteration29 paths + headless Agg backend)"""
+(updated to iteration31 paths + headless Agg backend)"""
 import json, pathlib, matplotlib
 from typing import Dict, List, Any
 
@@ -14,7 +14,7 @@ import seaborn as sns
 
 # ----------  paths & config  ------------------------------------------------
 ROOT = pathlib.Path(__file__).resolve().parent.parent
-RESEARCH_DIR = ROOT / ".research" / "iteration29"
+RESEARCH_DIR = ROOT / ".research" / "iteration31"
 IMG_DIR = RESEARCH_DIR / "images"
 for p in (RESEARCH_DIR, IMG_DIR):
     p.mkdir(parents=True, exist_ok=True)
@@ -30,7 +30,7 @@ def evaluate_fid(model, val_loader, scheduler, cfg: Dict[str, Any]):
     imgs = []
     total_needed = 10000
     batch_size = val_loader.batch_size or cfg["dataset"]["batch"]
-    steps = total_needed // batch_size
+    steps = total_needed // batch_size + 1  # ensure > total_needed
 
     amp_dtype = torch.bfloat16 if torch.cuda.is_bf16_supported() else torch.float16
 
