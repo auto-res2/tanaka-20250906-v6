@@ -25,8 +25,8 @@ from tqdm import tqdm
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 # Mandatory path change ───────────────────────────────────────────────────────
-# All JSON & figure artefacts must live under .research/iteration13/ …
-RESULT_DIR = ROOT / ".research" / "iteration13"  # <- UPDATED (iteration13)
+# All JSON & figure artefacts must live under .research/iteration14/ …
+RESULT_DIR = ROOT / ".research" / "iteration14"  # <- UPDATED (iteration14)
 RESULT_DIR.mkdir(parents=True, exist_ok=True)
 IMAGES_DIR = RESULT_DIR / "images"
 IMAGES_DIR.mkdir(exist_ok=True, parents=True)

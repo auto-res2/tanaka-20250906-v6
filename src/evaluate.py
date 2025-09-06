@@ -106,7 +106,9 @@ class InceptionScore:  # pragma: no cover – light wrapper around torch-fidelit
         images = next(iter(self.dataloader))[0][:500].cpu()
         dataset = _TensorDataset(images)
         try:
-            val = calculate_metrics(dataset, isc=True, fid=False)["inception_score_mean"]
+            # torch-fidelity requires keyword arguments; positional triggers a TypeError
+            metrics = calculate_metrics(input1=dataset, isc=True, fid=False, verbose=False)
+            val = metrics["inception_score_mean"]
             return float(val)
         except ValueError as exc:
             print("[WARNING] torch-fidelity failed to compute IS – using placeholder value.\n", str(exc))
