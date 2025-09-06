@@ -1,0 +1,26 @@
+warning: Failed to parse `pyproject.toml` during settings discovery:
+  TOML parse error at line 2, column 8
+    |
+  2 | ```toml
+    |        ^
+  key with no value, expected `=`
+
+error: Failed to parse: `pyproject.toml`
+  Caused by: TOML parse error at line 2, column 8
+  |
+2 | ```toml
+  |        ^
+key with no value, expected `=`
+warning: Failed to parse `pyproject.toml` during settings discovery:
+  TOML parse error at line 2, column 8
+    |
+  2 | ```toml
+    |        ^
+  key with no value, expected `=`
+
+error: Failed to parse: `pyproject.toml`
+  Caused by: TOML parse error at line 2, column 8
+  |
+2 | ```toml
+  |        ^
+key with no value, expected `=`
