@@ -1,0 +1,15 @@
+=== uv sync start Sat Sep  6 06:35:31 PM UTC 2025 ===
+=== uv install end Sat Sep  6 06:36:23 PM UTC 2025 ===
+=== experiment start Sat Sep  6 06:36:23 PM UTC 2025 ===
+=================  FFT-DiT EXPERIMENT SUITE  =================
+{
+  "exp": "exp1",
+  "seed": 13,
+  "num_seeds": 3,
+  "device": "cuda",
+  "img_size": 256,
+  "global_batch": 2048
+}
+
+=====  FFT_DIT  |  seed=13  =====
+[imagenet] downloading https://huggingface.co/datasets/mlx-vision/imagenet-1k/resolve/main/train/000000.tar
