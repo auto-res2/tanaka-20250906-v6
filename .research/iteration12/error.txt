@@ -1,0 +1,127 @@
+Using CPython 3.11.13
+Creating virtual environment at: .venv
+Resolved 65 packages in 966ms
+Installed 61 packages in 5.76s
+ + braceexpand==0.1.7
+ + certifi==2025.8.3
+ + charset-normalizer==3.4.3
+ + contourpy==1.3.3
+ + cycler==0.12.1
+ + diffusers==0.35.1
+ + fft-dit-research==0.1.0 (from file:///home/toma/actions-runner-2/_work/tanaka-20250906-v6/tanaka-20250906-v6)
+ + filelock==3.19.1
+ + fonttools==4.59.2
+ + fsspec==2025.9.0
+ + ftfy==6.3.1
+ + hf-xet==1.1.9
+ + huggingface-hub==0.34.4
+ + idna==3.10
+ + importlib-metadata==8.7.0
+ + jinja2==3.1.6
+ + kiwisolver==1.4.9
+ + markupsafe==3.0.2
+ + matplotlib==3.10.6
+ + mpmath==1.3.0
+ + networkx==3.5
+ + numpy==1.26.4
+ + nvidia-cublas-cu12==12.1.3.1
+ + nvidia-cuda-cupti-cu12==12.1.105
+ + nvidia-cuda-nvrtc-cu12==12.1.105
+ + nvidia-cuda-runtime-cu12==12.1.105
+ + nvidia-cudnn-cu12==8.9.2.26
+ + nvidia-cufft-cu12==11.0.2.54
+ + nvidia-curand-cu12==10.3.2.106
+ + nvidia-cusolver-cu12==11.4.5.107
+ + nvidia-cusparse-cu12==12.1.0.106
+ + nvidia-nccl-cu12==2.18.1
+ + nvidia-nvjitlink-cu12==12.9.86
+ + nvidia-nvtx-cu12==12.1.105
+ + open-clip-torch==2.32.0
+ + packaging==25.0
+ + pandas==2.3.2
+ + pillow==11.3.0
+ + pyparsing==3.2.3
+ + python-dateutil==2.9.0.post0
+ + pytz==2025.2
+ + pyyaml==6.0.2
+ + regex==2025.9.1
+ + requests==2.32.5
+ + safetensors==0.6.2
+ + scipy==1.16.1
+ + seaborn==0.13.2
+ + six==1.17.0
+ + sympy==1.14.0
+ + timm==1.0.19
+ + torch==2.1.2
+ + torch-fidelity==0.3.0
+ + torchvision==0.16.2
+ + tqdm==4.67.1
+ + triton==2.1.0
+ + typing-extensions==4.15.0
+ + tzdata==2025.2
+ + urllib3==2.5.0
+ + wcwidth==0.2.13
+ + webdataset==0.2.111
+ + zipp==3.23.0
+exp1_imagenet_fft_dit_s13:   0%|          | 0/100 [00:00<?, ?it/s]exp1_imagenet_fft_dit_s13:   0%|          | 0/100 [00:02<?, ?it/s, loss=-0.000]exp1_imagenet_fft_dit_s13:   1%|          | 1/100 [00:02<03:34,  2.17s/it, loss=-0.000]exp1_imagenet_fft_dit_s13:   1%|          | 1/100 [00:02<03:34,  2.17s/it, loss=-0.000]exp1_imagenet_fft_dit_s13:   2%|▏         | 2/100 [00:02<02:01,  1.24s/it, loss=-0.000]exp1_imagenet_fft_dit_s13:   2%|▏         | 2/100 [00:03<02:01,  1.24s/it, loss=-0.000]exp1_imagenet_fft_dit_s13:   3%|▎         | 3/100 [00:03<01:31,  1.06it/s, loss=-0.000]exp1_imagenet_fft_dit_s13:   3%|▎         | 3/100 [00:03<01:31,  1.06it/s, loss=-0.000]exp1_imagenet_fft_dit_s13:   4%|▍         | 4/100 [00:03<01:12,  1.32it/s, loss=-0.000]exp1_imagenet_fft_dit_s13:   4%|▍         | 4/100 [00:04<01:12,  1.32it/s, loss=0.000] exp1_imagenet_fft_dit_s13:   5%|▌         | 5/100 [00:04<01:05,  1.45it/s, loss=0.000]exp1_imagenet_fft_dit_s13:   5%|▌         | 5/100 [00:04<01:05,  1.45it/s, loss=0.000]exp1_imagenet_fft_dit_s13:   6%|▌         | 6/100 [00:04<01:01,  1.53it/s, loss=0.000]exp1_imagenet_fft_dit_s13:   6%|▌         | 6/100 [00:05<01:01,  1.53it/s, loss=0.000]exp1_imagenet_fft_dit_s13:   7%|▋         | 7/100 [00:05<00:58,  1.59it/s, loss=0.000]exp1_imagenet_fft_dit_s13:   7%|▋         | 7/100 [00:06<00:58,  1.59it/s, loss=-0.000]exp1_imagenet_fft_dit_s13:   8%|▊         | 8/100 [00:06<00:54,  1.68it/s, loss=-0.000]exp1_imagenet_fft_dit_s13:   8%|▊         | 8/100 [00:06<00:54,  1.68it/s, loss=0.000] exp1_imagenet_fft_dit_s13:   9%|▉         | 9/100 [00:06<00:51,  1.76it/s, loss=0.000]exp1_imagenet_fft_dit_s13:   9%|▉         | 9/100 [00:07<00:51,  1.76it/s, loss=-0.000]exp1_imagenet_fft_dit_s13:  10%|█         | 10/100 [00:07<00:49,  1.81it/s, loss=-0.000]exp1_imagenet_fft_dit_s13:  10%|█         | 10/100 [00:07<00:49,  1.81it/s, loss=-0.000]exp1_imagenet_fft_dit_s13:  11%|█         | 11/100 [00:07<00:48,  1.84it/s, loss=-0.000]exp1_imagenet_fft_dit_s13:  11%|█         | 11/100 [00:08<00:48,  1.84it/s, loss=-0.000]exp1_imagenet_fft_dit_s13:  12%|█▏        | 12/100 [00:08<00:47,  1.85it/s, loss=-0.000]exp1_imagenet_fft_dit_s13:  12%|█▏        | 12/100 [00:08<00:47,  1.85it/s, loss=-0.000]exp1_imagenet_fft_dit_s13:  13%|█▎        | 13/100 [00:08<00:45,  1.90it/s, loss=-0.000]exp1_imagenet_fft_dit_s13:  13%|█▎        | 13/100 [00:09<00:45,  1.90it/s, loss=0.000] exp1_imagenet_fft_dit_s13:  14%|█▍        | 14/100 [00:09<00:45,  1.90it/s, loss=0.000]exp1_imagenet_fft_dit_s13:  14%|█▍        | 14/100 [00:09<00:45,  1.90it/s, loss=-0.000]exp1_imagenet_fft_dit_s13:  15%|█▌        | 15/100 [00:09<00:44,  1.91it/s, loss=-0.000]exp1_imagenet_fft_dit_s13:  15%|█▌        | 15/100 [00:10<00:44,  1.91it/s, loss=0.000] exp1_imagenet_fft_dit_s13:  16%|█▌        | 16/100 [00:10<00:44,  1.90it/s, loss=0.000]exp1_imagenet_fft_dit_s13:  16%|█▌        | 16/100 [00:10<00:44,  1.90it/s, loss=0.000]exp1_imagenet_fft_dit_s13:  17%|█▋        | 17/100 [00:10<00:43,  1.92it/s, loss=0.000]exp1_imagenet_fft_dit_s13:  17%|█▋        | 17/100 [00:11<00:43,  1.92it/s, loss=0.000]exp1_imagenet_fft_dit_s13:  18%|█▊        | 18/100 [00:11<00:43,  1.88it/s, loss=0.000]exp1_imagenet_fft_dit_s13:  18%|█▊        | 18/100 [00:11<00:43,  1.88it/s, loss=0.000]exp1_imagenet_fft_dit_s13:  19%|█▉        | 19/100 [00:11<00:42,  1.90it/s, loss=0.000]exp1_imagenet_fft_dit_s13:  19%|█▉        | 19/100 [00:12<00:42,  1.90it/s, loss=-0.000]exp1_imagenet_fft_dit_s13:  20%|██        | 20/100 [00:12<00:42,  1.88it/s, loss=-0.000]Downloading: "https://github.com/toshas/torch-fidelity/releases/download/v0.2.0/weights-inception-2015-12-05-6726825d.pth" to /home/toma/.cache/torch/hub/checkpoints/weights-inception-2015-12-05-6726825d.pth
+
+  0%|          | 0.00/91.2M [00:00<?, ?B/s][A
+ 11%|█         | 10.0M/91.2M [00:00<00:04, 17.8MB/s][A
+ 22%|██▏       | 20.0M/91.2M [00:01<00:03, 19.2MB/s][A
+ 33%|███▎      | 30.0M/91.2M [00:01<00:03, 20.0MB/s][A
+ 44%|████▍     | 40.0M/91.2M [00:02<00:02, 20.2MB/s][A
+ 55%|█████▍    | 50.0M/91.2M [00:02<00:01, 26.6MB/s][A
+ 66%|██████▌   | 60.0M/91.2M [00:02<00:01, 24.3MB/s][A
+ 77%|███████▋  | 70.0M/91.2M [00:02<00:00, 30.0MB/s][A
+ 88%|████████▊ | 80.0M/91.2M [00:03<00:00, 26.2MB/s][A
+ 99%|█████████▊| 90.0M/91.2M [00:03<00:00, 31.5MB/s][A100%|██████████| 91.2M/91.2M [00:03<00:00, 26.0MB/s]
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "/home/toma/actions-runner-2/_work/tanaka-20250906-v6/tanaka-20250906-v6/src/main.py", line 132, in <module>
+    sys.exit(main())
+             ^^^^^^
+  File "/home/toma/actions-runner-2/_work/tanaka-20250906-v6/tanaka-20250906-v6/src/main.py", line 118, in main
+    res = _single_run(model_key, seed)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/toma/actions-runner-2/_work/tanaka-20250906-v6/tanaka-20250906-v6/src/main.py", line 74, in _single_run
+    trainer.fit()
+  File "/home/toma/actions-runner-2/_work/tanaka-20250906-v6/tanaka-20250906-v6/src/train.py", line 256, in fit
+    fid = FIDEvaluator(self.val_loader, self.model, self.device).compute()
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/toma/actions-runner-2/_work/tanaka-20250906-v6/tanaka-20250906-v6/src/evaluate.py", line 48, in compute
+    metrics: Dict[str, float] = calculate_metrics(
+                                ^^^^^^^^^^^^^^^^^^
+  File "/home/toma/actions-runner-2/_work/tanaka-20250906-v6/tanaka-20250906-v6/.venv/lib/python3.11/site-packages/torch_fidelity/metrics.py", line 235, in calculate_metrics
+    metric_fid = fid_inputs_to_metric(feat_extractor, **kwargs)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/toma/actions-runner-2/_work/tanaka-20250906-v6/tanaka-20250906-v6/.venv/lib/python3.11/site-packages/torch_fidelity/metric_fid.py", line 122, in fid_inputs_to_metric
+    stats_1 = fid_input_id_to_statistics_cached(1, feat_extractor, feat_layer_name, **kwargs)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/toma/actions-runner-2/_work/tanaka-20250906-v6/tanaka-20250906-v6/.venv/lib/python3.11/site-packages/torch_fidelity/metric_fid.py", line 113, in fid_input_id_to_statistics_cached
+    stat = fn_recompute()
+           ^^^^^^^^^^^^^^
+  File "/home/toma/actions-runner-2/_work/tanaka-20250906-v6/tanaka-20250906-v6/.venv/lib/python3.11/site-packages/torch_fidelity/metric_fid.py", line 104, in fn_recompute
+    return fid_input_id_to_statistics(input_id, feat_extractor, feat_layer_name, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/toma/actions-runner-2/_work/tanaka-20250906-v6/tanaka-20250906-v6/.venv/lib/python3.11/site-packages/torch_fidelity/metric_fid.py", line 97, in fid_input_id_to_statistics
+    featuresdict = extract_featuresdict_from_input_id_cached(input_id, feat_extractor, **kwargs)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/toma/actions-runner-2/_work/tanaka-20250906-v6/tanaka-20250906-v6/.venv/lib/python3.11/site-packages/torch_fidelity/utils.py", line 372, in extract_featuresdict_from_input_id_cached
+    featuresdict = fn_recompute()
+                   ^^^^^^^^^^^^^^
+  File "/home/toma/actions-runner-2/_work/tanaka-20250906-v6/tanaka-20250906-v6/.venv/lib/python3.11/site-packages/torch_fidelity/utils.py", line 360, in fn_recompute
+    return extract_featuresdict_from_input_id(input_id, feat_extractor, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/toma/actions-runner-2/_work/tanaka-20250906-v6/tanaka-20250906-v6/.venv/lib/python3.11/site-packages/torch_fidelity/utils.py", line 342, in extract_featuresdict_from_input_id
+    input = prepare_input_from_id(input_id, **kwargs)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/toma/actions-runner-2/_work/tanaka-20250906-v6/tanaka-20250906-v6/.venv/lib/python3.11/site-packages/torch_fidelity/utils.py", line 275, in prepare_input_from_id
+    return prepare_input_from_descriptor(input_desc, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/toma/actions-runner-2/_work/tanaka-20250906-v6/tanaka-20250906-v6/.venv/lib/python3.11/site-packages/torch_fidelity/utils.py", line 253, in prepare_input_from_descriptor
+    vassert(
+  File "/home/toma/actions-runner-2/_work/tanaka-20250906-v6/tanaka-20250906-v6/.venv/lib/python3.11/site-packages/torch_fidelity/helpers.py", line 9, in vassert
+    raise ValueError(message)
+ValueError: Input descriptor "input" field can be either an instance of Dataset, GenerativeModelBase class, or a string, such as a path to a name of a registered dataset (cifar10-train, cifar10-val, stl10-train, stl10-test, stl10-unlabeled), a directory with file samples, or a path to an ONNX or PTH (JIT) module
+exp1_imagenet_fft_dit_s13:  20%|██        | 20/100 [00:22<01:30,  1.13s/it, loss=-0.000]
