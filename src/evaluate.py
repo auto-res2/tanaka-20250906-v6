@@ -1,4 +1,4 @@
-"""src/evaluate.py – evaluation utilities & plotting (paths fixed to iteration27 & AMP fallback)"""
+"""src/evaluate.py – evaluation utilities & plotting (paths fixed to iteration28 & AMP fallback)"""
 import json, pathlib
 from typing import Dict, List, Any
 
@@ -10,7 +10,7 @@ import seaborn as sns
 
 # ----------  paths & config  ------------------------------------------------
 ROOT = pathlib.Path(__file__).resolve().parent.parent
-RESEARCH_DIR = ROOT / ".research" / "iteration27"
+RESEARCH_DIR = ROOT / ".research" / "iteration28"
 IMG_DIR = RESEARCH_DIR / "images"
 for p in (RESEARCH_DIR, IMG_DIR):
     p.mkdir(parents=True, exist_ok=True)

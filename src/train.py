@@ -1,4 +1,4 @@
-"""src/train.py – model definitions, training loop, per-run execution (paths fixed to iteration27 & OOM-profiler patch)"""
+"""src/train.py – model definitions, training loop, per-run execution (paths fixed to iteration28 & micro-batch OOM patch)"""
 import json, pathlib, random, shutil, subprocess, sys, time, os, contextlib
 from typing import Dict, Any, List
 
@@ -14,8 +14,8 @@ import torch.nn.functional as F
 # ---------------------------------------------------------------------------
 ROOT = pathlib.Path(__file__).resolve().parent.parent      # repo root
 DATA_DIR = ROOT / "data"
-#  MANDATORY research output dir (iteration **27**)
-RESEARCH_DIR = ROOT / ".research" / "iteration27"
+#  MANDATORY research output dir (iteration **28**)
+RESEARCH_DIR = ROOT / ".research" / "iteration28"
 IMG_DIR = RESEARCH_DIR / "images"
 for p in (DATA_DIR, RESEARCH_DIR, IMG_DIR):
     p.mkdir(parents=True, exist_ok=True)
@@ -181,6 +181,10 @@ class DiffusionTrainer:
         )
         self.scheduler = DDPMScheduler(num_train_timesteps=1000)
 
+        # micro-batching to tame GPU memory -----------------------------------
+        # If "micro_batch" not in YAML, fall back to 16 which is safe on T4 / 16 GB
+        self.micro_batch = int(CFG.get("micro_batch", 16))
+
         # decide if we profile -------------------------------------------------
         self.profile_batches = CFG.get("profile_batches", 0)
         if self.profile_batches > 0:
@@ -208,18 +212,26 @@ class DiffusionTrainer:
         with self.prof:
             for epoch in range(max_epochs):
                 self.model.train()
-                for _, batch in enumerate(train_loader):
-                    imgs = batch["x"].cuda(non_blocking=True)
-                    t = torch.randint(0, 1000, (imgs.size(0),), device=imgs.device)
-                    noise = torch.randn_like(imgs)
-                    noisy = self.scheduler.add_noise(imgs, noise, t)
-
-                    with autocast("cuda", dtype=amp_dtype):
-                        pred = self.model(noisy, t.float() / 1000.0)
-                        loss = F.mse_loss(pred, noise)
-
+                for batch in train_loader:
+                    imgs_cpu = batch["x"]  # still on host (pinned) memory
+                    total_B = imgs_cpu.size(0)
                     self.optim.zero_grad(set_to_none=True)
-                    self.scaler.scale(loss).backward()
+                    accum_steps = (total_B + self.micro_batch - 1) // self.micro_batch
+
+                    for i0 in range(0, total_B, self.micro_batch):
+                        imgs = imgs_cpu[i0:i0 + self.micro_batch].cuda(non_blocking=True)
+                        cur_B = imgs.size(0)
+                        t = torch.randint(0, 1000, (cur_B,), device=imgs.device)
+                        noise = torch.randn_like(imgs)
+                        noisy = self.scheduler.add_noise(imgs, noise, t)
+
+                        with autocast("cuda", dtype=amp_dtype):
+                            pred = self.model(noisy, t.float() / 1000.0)
+                            loss = F.mse_loss(pred, noise) / accum_steps  # normalise by grad-accum steps
+
+                        self.scaler.scale(loss).backward()
+
+                    # Optimiser step after full logical batch ----------------
                     self.scaler.step(self.optim)
                     self.scaler.update()
                     self.prof.step()
