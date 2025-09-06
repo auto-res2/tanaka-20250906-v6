@@ -9,6 +9,7 @@ import os
 import pathlib
 import random
 import time
+from functools import partial
 from types import SimpleNamespace
 from typing import Any, Dict, List
 
@@ -24,7 +25,7 @@ from tqdm import tqdm
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 # Mandatory path change ───────────────────────────────────────────────────────
-RESULT_DIR = ROOT / ".research" / "iteration8"  # <- updated from iteration7
+RESULT_DIR = ROOT / ".research" / "iteration9"  # <- updated to iteration9
 RESULT_DIR.mkdir(parents=True, exist_ok=True)
 IMAGES_DIR = RESULT_DIR / "images"
 IMAGES_DIR.mkdir(exist_ok=True, parents=True)
@@ -167,8 +168,16 @@ class Trainer:  # pylint: disable=too-many-instance-attributes
         device: str = "cuda",
     ) -> None:
         self.device = torch.device(device if torch.cuda.is_available() else "cpu")
+        # ------------------------------------------------------------------
+        #  FSDP wrapping (only if multi-GPU *and* FSDP available)
+        # ------------------------------------------------------------------
         if _FSDP_AVAILABLE and torch.cuda.device_count() > 1:
-            model = FSDP(model, auto_wrap_policy=size_based_auto_wrap_policy(16000))
+            # Torch ≥2.0 changed `size_based_auto_wrap_policy` signature to
+            # (module, recurse, nonwrapped_numel, *, min_num_params).
+            # We therefore create a `functools.partial` that pre-sets
+            # `min_num_params` while leaving the first three args for FSDP.
+            policy = partial(size_based_auto_wrap_policy, min_num_params=16000)
+            model = FSDP(model, auto_wrap_policy=policy)
         self.model = model
         self.train_loader = train_loader
         self.val_loader = val_loader
