@@ -22,10 +22,10 @@ import torch
 import torch.nn as nn
 
 # -----------------------------------------------------------------------------
-#  Global constants – mandatory directory layout (iteration17)
+#  Global constants – mandatory directory layout (iteration18)
 # -----------------------------------------------------------------------------
 
-RESULT_DIR = Path(".research/iteration17")
+RESULT_DIR = Path(".research/iteration18")
 IMG_DIR = RESULT_DIR / "images"
 
 # Create mandatory directories (no error if they already exist)

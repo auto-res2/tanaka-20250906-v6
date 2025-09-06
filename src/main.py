@@ -89,7 +89,7 @@ def _single_run(model_key: str, seed: int) -> Dict[str, Any]:  # noqa: D401
         params=MODELS[model_key]["params"],
     )
 
-    # save individual result file – path changed to iteration5 automatically via RESULT_DIR import
+    # save individual result file – path changed to iteration18 automatically via RESULT_DIR import
     ts = int(time.time())
     out_path = RESULT_DIR / f"exp1_{DATASET_KEY}_{model_key}_s{seed}_{ts}.json"
     save_json(res, out_path)
@@ -125,7 +125,13 @@ def main() -> None:
     print("\n===========  RESULTS (JSON)  ===========")
     print(json.dumps(results, indent=2))
     print("========================================")
-    print(f"Saved consolidated results  ->  {all_path.relative_to(pathlib.Path.cwd())}")
+
+    # Robust relative-path printing – fall back to absolute when anchors differ
+    try:
+        rel_path = all_path.relative_to(pathlib.Path.cwd())
+    except ValueError:
+        rel_path = all_path
+    print(f"Saved consolidated results  ->  {rel_path}")
 
 
 if __name__ == "__main__":  # pragma: no cover

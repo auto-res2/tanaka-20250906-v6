@@ -14,8 +14,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 import torch
 
-# Mandatory directory (iteration17)
-RESULT_DIR = Path(".research/iteration17")
+# Mandatory directory (iteration18)
+RESULT_DIR = Path(".research/iteration18")
 IMG_DIR = RESULT_DIR / "images"
 IMG_DIR.mkdir(parents=True, exist_ok=True)
 
