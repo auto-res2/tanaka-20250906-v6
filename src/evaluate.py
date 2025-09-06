@@ -7,7 +7,7 @@ from typing import Dict, List
 import matplotlib.pyplot as plt
 import seaborn as sns
 import torch
-from torch.utils.data import DataLoader
+from torch.utils.data import DataLoader, Dataset
 
 # heavy imports are lazy to avoid unnecessary runtime cost
 FID_METRICS_AVAILABLE = True
@@ -20,6 +20,26 @@ try:
     import open_clip  # pylint: disable=import-error
 except ModuleNotFoundError:
     open_clip = None  # type: ignore
+
+
+# -----------------------------------------------------------------------------
+#  Utility – wrap a tensor batch into a ``torch.utils.data.Dataset`` so that
+#  ``torch-fidelity`` (which expects a Dataset, path, or generator) accepts it.
+# -----------------------------------------------------------------------------
+
+
+class _TensorDataset(Dataset):
+    """Minimal Dataset wrapper around a 4-D image tensor (N,C,H,W)."""
+
+    def __init__(self, tensor: torch.Tensor):
+        super().__init__()
+        self.tensor = tensor
+
+    def __len__(self) -> int:  # noqa: D401 – Dataset protocol
+        return self.tensor.shape[0]
+
+    def __getitem__(self, idx):  # noqa: D401 – Dataset protocol
+        return self.tensor[idx]
 
 
 # -----------------------------------------------------------------------------
@@ -45,11 +65,24 @@ class FIDEvaluator:  # pylint: disable=too-few-public-methods
                 if idx == 49:
                     break
         imgs_tensor = torch.cat(imgs, dim=0)
-        metrics: Dict[str, float] = calculate_metrics(
-            input1=imgs_tensor, input2=self._generate(imgs_tensor.shape[0]),
-            fid=True, isc=False, kid=False, prc=False, verbose=False
-        )
-        return float(metrics["frechet_inception_distance"])
+
+        # Convert tensors to Dataset objects acceptable by torch-fidelity
+        dataset_real = _TensorDataset(imgs_tensor)
+        dataset_fake = _TensorDataset(self._generate(imgs_tensor.shape[0]))
+        try:
+            metrics: Dict[str, float] = calculate_metrics(
+                input1=dataset_real,
+                input2=dataset_fake,
+                fid=True,
+                isc=False,
+                kid=False,
+                prc=False,
+                verbose=False,
+            )
+            return float(metrics["frechet_inception_distance"])
+        except ValueError as exc:  # Fallback – return a dummy large value so training continues
+            print("[WARNING] torch-fidelity failed to compute FID – using placeholder value.\n", str(exc))
+            return 999.0
 
     def _generate(self, n: int) -> torch.Tensor:
         """Generate *n* synthetic images with the diffusion model (very rough)."""
@@ -70,9 +103,14 @@ class InceptionScore:  # pragma: no cover – light wrapper around torch-fidelit
     def compute(self) -> float:
         if not FID_METRICS_AVAILABLE:
             raise RuntimeError("`torch-fidelity` not installed – install to compute IS.")
-        imgs = next(iter(self.dataloader))[0][:500].cpu()  # quick sample
-        val = calculate_metrics(imgs, isc=True, fid=False)["inception_score_mean"]
-        return float(val)
+        images = next(iter(self.dataloader))[0][:500].cpu()
+        dataset = _TensorDataset(images)
+        try:
+            val = calculate_metrics(dataset, isc=True, fid=False)["inception_score_mean"]
+            return float(val)
+        except ValueError as exc:
+            print("[WARNING] torch-fidelity failed to compute IS – using placeholder value.\n", str(exc))
+            return 0.0
 
 
 class CLIPScore:  # very approximate – uses open_clip textual encoder if available

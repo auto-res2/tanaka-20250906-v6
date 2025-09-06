@@ -25,8 +25,8 @@ from tqdm import tqdm
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 # Mandatory path change ───────────────────────────────────────────────────────
-# All JSON & figure artefacts must live under .research/iteration12/ …
-RESULT_DIR = ROOT / ".research" / "iteration12"  # <- UPDATED (iteration12)
+# All JSON & figure artefacts must live under .research/iteration13/ …
+RESULT_DIR = ROOT / ".research" / "iteration13"  # <- UPDATED (iteration13)
 RESULT_DIR.mkdir(parents=True, exist_ok=True)
 IMAGES_DIR = RESULT_DIR / "images"
 IMAGES_DIR.mkdir(exist_ok=True, parents=True)
@@ -149,7 +149,8 @@ class FFTDiTWrapper(nn.Module):
 
 def create_model(img_size: int, device: str = "cuda") -> FFTDiTWrapper:
     model = FFTDiTWrapper(img_size)
-    dtype = torch.bfloat16 if torch.cuda.is_available() else torch.float32
+    # Use float16 for broad GPU compatibility; fall back to float32 on CPU
+    dtype = torch.float16 if torch.cuda.is_available() else torch.float32
     return model.to(device=device, dtype=dtype)
 
 
@@ -235,7 +236,7 @@ class Trainer:  # pylint: disable=too-many-instance-attributes
                 images = images.to(self.device, non_blocking=True)
                 timesteps = torch.randint(0, 1000, (images.size(0),), device=self.device)
 
-                with autocast(enabled=self.device.type == "cuda", dtype=torch.bfloat16):
+                with autocast(enabled=self.device.type == "cuda", dtype=torch.float16):
                     loss = self.model(images, timesteps)["loss"]
 
                 loss.backward()
