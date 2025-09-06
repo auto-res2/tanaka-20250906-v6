@@ -4,7 +4,7 @@ from typing import Dict, Any, List
 
 import torch, yaml, numpy as np
 from torch import nn
-from torch.cuda.amp import GradScaler, autocast   # <- use CUDA-specific autocast (no device_type arg)
+from torch.cuda.amp import GradScaler, autocast   # CUDA-specific autocast
 import torch.nn.functional as F
 from torch.profiler import profile, ProfilerActivity, tensorboard_trace_handler
 
@@ -13,8 +13,8 @@ from torch.profiler import profile, ProfilerActivity, tensorboard_trace_handler
 # ---------------------------------------------------------------------------
 ROOT = pathlib.Path(__file__).resolve().parent.parent      # repo root (one level above src)
 DATA_DIR = ROOT / "data"
-#  Mandatory research output dirs (iteration **23**) – updated per rubric
-RESEARCH_DIR = ROOT / ".research" / "iteration23"
+#  Mandatory research output dirs (iteration **25**) – per rubric
+RESEARCH_DIR = ROOT / ".research" / "iteration25"
 IMG_DIR = RESEARCH_DIR / "images"
 for p in (DATA_DIR, RESEARCH_DIR, IMG_DIR):
     p.mkdir(parents=True, exist_ok=True)
@@ -100,13 +100,24 @@ class FFTDiT_S(nn.Module):
         """x ∈ [-1,1]  (B,3,H,W) ;  t ∈ [0,1]  (B,)"""
         B = x.size(0)
         patch_H = self.img_size // 4
+        d = self.pos.size(-1)
+
+        # Stem
         x = self.patch_embed(x)                      # (B, d, H/4, W/4)
         x = x.flatten(2).transpose(1, 2) + self.pos  # (B, N, d)
+
+        # Per-sample FiLM scale
         gamma = self.hyper(t)                        # (B, d)
+
+        # Initial dummy context "c" expected by DiTBlock (shape: B × d)
+        c = torch.zeros(B, d, device=x.device, dtype=x.dtype)
+
         for blk in self.blocks:
-            x = blk(x)
-            x = x * gamma.unsqueeze(1)               # FiLM gating
-            x = self.adapter(x)                      # spectral adapter
+            x, c = blk(x, c)             # DiTBlock returns (x, c)
+            x = x * gamma.unsqueeze(1)   # FiLM gating after block
+            x = self.adapter(x)          # spectral adapter
+
+        # Head
         x = self.ln_out(x)
         x = self.proj(x)                             # (B, N, 48)
 
@@ -164,12 +175,14 @@ class DiffusionTrainer:
     # ---------------------  main loop  -------------------------
     def train(self, train_loader, val_loader, exp_key: str):
         profile_batches = CFG.get("profile_batches", 100)
+        trace_dir = RES_DIR / exp_key
+        trace_dir.mkdir(parents=True, exist_ok=True)
         prof = profile(
             activities=[ProfilerActivity.CUDA],
             record_shapes=False,
             with_stack=False,
             schedule=torch.profiler.schedule(wait=0, warmup=2, active=profile_batches, repeat=1),
-            on_trace_ready=tensorboard_trace_handler(str(RES_DIR / exp_key)),
+            on_trace_ready=tensorboard_trace_handler(str(trace_dir)),
         )
 
         best_fid = float("inf")

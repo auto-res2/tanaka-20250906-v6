@@ -3,14 +3,14 @@ import json, pathlib
 from typing import Dict, List, Any
 
 import torch, yaml
-from torch.cuda.amp import autocast      # fixed import – CUDA-specific
+from torch.cuda.amp import autocast      # CUDA-specific
 from torch_fidelity import calculate_metrics
 import matplotlib.pyplot as plt
 import seaborn as sns
 
 # ----------  paths & config  ------------------------------------------------
 ROOT = pathlib.Path(__file__).resolve().parent.parent
-RESEARCH_DIR = ROOT / ".research" / "iteration23"
+RESEARCH_DIR = ROOT / ".research" / "iteration25"
 IMG_DIR = RESEARCH_DIR / "images"
 for p in (RESEARCH_DIR, IMG_DIR):
     p.mkdir(parents=True, exist_ok=True)
