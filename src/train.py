@@ -1,5 +1,4 @@
 [UPDATED_FILE]
-```python
 """src/train.py – model creation and training utilities for FFT-DiT experiments
 All heavy-lifting (model definition, FSDP trainer, seed helpers) lives here so
 that the other modules can stay lightweight.  Nothing outside the six allowed
@@ -26,7 +25,7 @@ from tqdm import tqdm
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 # Updated directory according to the NEW mandatory instructions ---------------
-RESULT_DIR = ROOT / ".research" / "iteration3"
+RESULT_DIR = ROOT / ".research" / "iteration4"
 RESULT_DIR.mkdir(parents=True, exist_ok=True)
 IMAGES_DIR = RESULT_DIR / "images"
 IMAGES_DIR.mkdir(exist_ok=True, parents=True)
@@ -196,4 +195,3 @@ def save_json(obj: Any, path: pathlib.Path | str) -> None:  # noqa: D401
     path.parent.mkdir(parents=True, exist_ok=True)
     with path.open("w") as handle:
         json.dump(obj, handle, indent=2)
-```

@@ -1,5 +1,4 @@
 [UPDATED_FILE]
-```python
 """src/main.py – orchestrates the complete FFT-DiT experiment suite.
 Run with  :  python -m src.main
 """
@@ -91,10 +90,15 @@ def _single_run(model_key: str, seed: int) -> Dict[str, Any]:  # noqa: D401
         params=MODELS[model_key]["params"],
     )
 
-    # save individual result file – path changed to iteration3 automatically via RESULT_DIR import
+    # save individual result file – path changed to iteration4 automatically via RESULT_DIR import
     ts = int(time.time())
     out_path = RESULT_DIR / f"exp1_{DATASET_KEY}_{model_key}_s{seed}_{ts}.json"
     save_json(res, out_path)
+
+    # Immediately print JSON contents for verification as per mandatory rule
+    print("\n--- Individual Result JSON ---")
+    print(json.dumps(res, indent=2))
+    print("------------------------------\n")
 
     # training loss curve
     curve_path = RESULT_DIR / "images" / f"training_loss_{model_key}_{DATASET_KEY}.pdf"
@@ -127,4 +131,3 @@ def main() -> None:
 
 if __name__ == "__main__":  # pragma: no cover
     sys.exit(main())
-```
