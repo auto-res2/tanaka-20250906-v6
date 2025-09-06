@@ -1,36 +1,33 @@
-"""src/train.py – model definitions, training loop, per-run execution (fixed paths & config)
-NOTE:
-  • Mandatory research output directory changed from iteration25 → iteration26 as required by rubric.
-  • Fixed mismatch with DiTBlock return signature (it returns only `x`).
-"""
-import json, pathlib, random, shutil, subprocess, sys, time, os
+"""src/train.py – model definitions, training loop, per-run execution (paths fixed to iteration27 & OOM-profiler patch)"""
+import json, pathlib, random, shutil, subprocess, sys, time, os, contextlib
 from typing import Dict, Any, List
 
 import torch, yaml, numpy as np
 from torch import nn
-from torch.cuda.amp import GradScaler, autocast   # CUDA-specific autocast
+# modern AMP API -------------------------------------------------------------
+from torch import autocast                         # torch.autocast("cuda", …)
+from torch.amp import GradScaler                   # new location (cuda-agnostic)
 import torch.nn.functional as F
-from torch.profiler import profile, ProfilerActivity, tensorboard_trace_handler
 
 # ---------------------------------------------------------------------------
-#  Repository paths (identical logic in all src/* modules for self-containment)
+#  Repository paths
 # ---------------------------------------------------------------------------
-ROOT = pathlib.Path(__file__).resolve().parent.parent      # repo root (one level above src)
+ROOT = pathlib.Path(__file__).resolve().parent.parent      # repo root
 DATA_DIR = ROOT / "data"
-#  Mandatory research output dirs (iteration **26**) – per rubric
-RESEARCH_DIR = ROOT / ".research" / "iteration26"
+#  MANDATORY research output dir (iteration **27**)
+RESEARCH_DIR = ROOT / ".research" / "iteration27"
 IMG_DIR = RESEARCH_DIR / "images"
 for p in (DATA_DIR, RESEARCH_DIR, IMG_DIR):
     p.mkdir(parents=True, exist_ok=True)
 
-# Keep legacy aliases so the rest of the codebase remains unchanged -------------
+# legacy aliases ----------------------------------------------------------------
 RES_DIR = RESEARCH_DIR   # JSON, traces, etc.
 FIG_DIR = IMG_DIR        # figures / images
 
 # ---------------------------------------------------------------------------
-#  Configuration loader (single source of truth)
+#  Configuration loader
 # ---------------------------------------------------------------------------
-CFG_FILE = ROOT / "config" / "config.yaml"   # fixed name (was exp.yaml)
+CFG_FILE = ROOT / "config" / "config.yaml"
 if not CFG_FILE.exists():
     raise FileNotFoundError("Configuration file not found – create it under config/config.yaml before running.")
 CFG = yaml.safe_load(CFG_FILE.read_text())
@@ -46,10 +43,24 @@ if not DIT_REPO.exists():
     (DIT_REPO / ".git").rename(DIT_REPO / "_git")  # avoid nested-repo issues
 
 sys.path.insert(0, str(DIT_REPO))
-from models import DiT as _DiT       # noqa: E402 (external import after path manipulation)
-from models import DiTBlock          # noqa: E402
+from models import DiT as _DiT          # noqa: E402
+from models import DiTBlock             # noqa: E402
 
+# ---------------------------------------------------------------------------
+#  Small utility – graceful profiler disable ---------------------------------
+# ---------------------------------------------------------------------------
+class _NoOpProfiler(contextlib.AbstractContextManager):
+    """Stand-in for torch.profiler.profile when profiling is disabled."""
+    def __enter__(self):
+        return self
+    def __exit__(self, *exc):
+        return False
+    def step(self):
+        pass
 
+# ---------------------------------------------------------------------------
+#  Layers / modules ----------------------------------------------------------
+# ---------------------------------------------------------------------------
 class SpectralAdapter(nn.Module):
     """Low-rank spectral adapter (LoRA-style)."""
     def __init__(self, dim: int, rank: int):
@@ -62,7 +73,7 @@ class SpectralAdapter(nn.Module):
 
 
 class HyperNet(nn.Module):
-    """Mini hyper-network that predicts FiLM-style scaling vectors from timestep t."""
+    """Mini hyper-network predicting FiLM scaling vectors from timestep t."""
     def __init__(self, hidden: int, dim: int):
         super().__init__()
         self.net = nn.Sequential(
@@ -72,7 +83,7 @@ class HyperNet(nn.Module):
         )
 
     def forward(self, t):
-        return self.net(t.unsqueeze(-1))  # → (B, dim)
+        return self.net(t.unsqueeze(-1))
 
 
 class FFTDiT_S(nn.Module):
@@ -85,18 +96,18 @@ class FFTDiT_S(nn.Module):
         self.adapter_rank = cfg["adapter_rank"]
         self.img_size = cfg["img_size"]
 
-        # Stem – 4×4 patch embed (like ViT/DiT)
+        # Stem – 4×4 patch embed
         self.patch_embed = nn.Conv2d(3, d, kernel_size=4, stride=4)
         self.pos = nn.Parameter(torch.randn(1, (self.img_size // 4) ** 2, d) * 0.02)
 
-        # Hyper-network for FiLM gating
+        # FiLM hyper-network
         self.hyper = HyperNet(hidden=d, dim=d)
 
-        # Transformer backbone (reuse official DiTBlock)
+        # Backbone + shared adapter
         self.blocks = nn.ModuleList([DiTBlock(d, heads) for _ in range(depth)])
-        self.adapter = SpectralAdapter(d, self.adapter_rank)  # shared across layers
+        self.adapter = SpectralAdapter(d, self.adapter_rank)
 
-        # Output – predict noise ε per patch (48 dims per patch → 3×4×4)
+        # Output head – predict ε
         self.ln_out = nn.LayerNorm(d)
         self.proj = nn.Linear(d, 3 * 4 * 4)
 
@@ -107,35 +118,28 @@ class FFTDiT_S(nn.Module):
         d = self.pos.size(-1)
 
         # Stem
-        x = self.patch_embed(x)                      # (B, d, H/4, W/4)
-        x = x.flatten(2).transpose(1, 2) + self.pos  # (B, N, d)
+        x = self.patch_embed(x)                      # (B,d,H/4,W/4)
+        x = x.flatten(2).transpose(1, 2) + self.pos  # (B,N,d)
 
-        # Per-sample FiLM scale
-        gamma = self.hyper(t)                        # (B, d)
-
-        # Initial dummy context "c" expected by DiTBlock (shape: B × d)
-        c = torch.zeros(B, d, device=x.device, dtype=x.dtype)
+        # FiLM
+        gamma = self.hyper(t)                        # (B,d)
+        c = torch.zeros(B, d, device=x.device, dtype=x.dtype)  # dummy class token context
 
         for blk in self.blocks:
-            # DiTBlock returns only the transformed token sequence
             x = blk(x, c)
-            x = x * gamma.unsqueeze(1)               # FiLM gating after block
+            x = x * gamma.unsqueeze(1)               # FiLM gating
             x = self.adapter(x)                      # spectral adapter
 
         # Head
         x = self.ln_out(x)
-        x = self.proj(x)                             # (B, N, 48)
-
-        # Re-fold tokens → feature map (B,48,patch_H,patch_H)
-        x = x.view(B, patch_H, patch_H, 48).contiguous().permute(0, 3, 1, 2)
-
-        # Single pixel-shuffle to original resolution (4×) ⇒ (B,3,H,W)
-        x = torch.nn.functional.pixel_shuffle(x, 4)
+        x = self.proj(x)                             # (B,N,48)
+        x = x.view(B, patch_H, patch_H, 48).permute(0, 3, 1, 2).contiguous()
+        x = torch.nn.functional.pixel_shuffle(x, 4)  # (B,3,H,W)
         return x
 
 
 class DiT_S(nn.Module):
-    """Wrapper around the official DiT implementation adjusted for CIFAR/mini-ImageNet size."""
+    """Wrapper around official DiT implementation adjusted for mini-ImageNet size."""
     def __init__(self, cfg: dict):
         super().__init__()
         self.net = _DiT(
@@ -177,50 +181,57 @@ class DiffusionTrainer:
         )
         self.scheduler = DDPMScheduler(num_train_timesteps=1000)
 
+        # decide if we profile -------------------------------------------------
+        self.profile_batches = CFG.get("profile_batches", 0)
+        if self.profile_batches > 0:
+            from torch.profiler import profile, ProfilerActivity, tensorboard_trace_handler
+            trace_dir = RES_DIR / f"trace_seed{seed}"
+            trace_dir.mkdir(parents=True, exist_ok=True)
+            self.prof = profile(
+                activities=[ProfilerActivity.CPU],  # CPU-only to avoid GPU OOM
+                record_shapes=False,
+                schedule=torch.profiler.schedule(wait=0, warmup=2, active=self.profile_batches, repeat=1),
+                on_trace_ready=tensorboard_trace_handler(str(trace_dir)),
+            )
+        else:
+            self.prof = _NoOpProfiler()
+
     # ---------------------  main loop  -------------------------
     def train(self, train_loader, val_loader, exp_key: str):
-        profile_batches = CFG.get("profile_batches", 100)
-        trace_dir = RES_DIR / exp_key
-        trace_dir.mkdir(parents=True, exist_ok=True)
-        prof = profile(
-            activities=[ProfilerActivity.CUDA],
-            record_shapes=False,
-            with_stack=False,
-            schedule=torch.profiler.schedule(wait=0, warmup=2, active=profile_batches, repeat=1),
-            on_trace_ready=tensorboard_trace_handler(str(trace_dir)),
-        )
-
         best_fid = float("inf")
         start = time.time()
         max_epochs = CFG.get("max_epochs", 50)
         early_stop_fid = CFG.get("early_stop_fid", 11.0)
 
-        for epoch in range(max_epochs):
-            self.model.train()
-            for _, batch in enumerate(train_loader):
-                imgs = batch["x"].cuda(non_blocking=True)
-                t = torch.randint(0, 1000, (imgs.size(0),), device=imgs.device)
-                noise = torch.randn_like(imgs)
-                noisy = self.scheduler.add_noise(imgs, noise, t)
+        amp_dtype = torch.bfloat16 if torch.cuda.is_bf16_supported() else torch.float16
 
-                with autocast(dtype=torch.bfloat16):
-                    pred = self.model(noisy, t.float() / 1000.0)
-                    loss = F.mse_loss(pred, noise)
+        with self.prof:
+            for epoch in range(max_epochs):
+                self.model.train()
+                for _, batch in enumerate(train_loader):
+                    imgs = batch["x"].cuda(non_blocking=True)
+                    t = torch.randint(0, 1000, (imgs.size(0),), device=imgs.device)
+                    noise = torch.randn_like(imgs)
+                    noisy = self.scheduler.add_noise(imgs, noise, t)
 
-                self.optim.zero_grad(set_to_none=True)
-                self.scaler.scale(loss).backward()
-                self.scaler.step(self.optim)
-                self.scaler.update()
-                prof.step()
+                    with autocast("cuda", dtype=amp_dtype):
+                        pred = self.model(noisy, t.float() / 1000.0)
+                        loss = F.mse_loss(pred, noise)
 
-            # -------------  validation FID every 2 epochs -------------
-            if (epoch + 1) % 2 == 0:
-                fid = evaluate_fid(self.model, val_loader, self.scheduler, CFG)
-                print(f"[VAL] epoch={epoch + 1}   FID={fid:.2f}")
-                best_fid = min(best_fid, fid)
-                if fid <= early_stop_fid:
-                    print("[EARLY STOP] Target FID reached – stopping training.")
-                    break
+                    self.optim.zero_grad(set_to_none=True)
+                    self.scaler.scale(loss).backward()
+                    self.scaler.step(self.optim)
+                    self.scaler.update()
+                    self.prof.step()
+
+                # -------------  validation FID every 2 epochs -------------
+                if (epoch + 1) % 2 == 0:
+                    fid = evaluate_fid(self.model, val_loader, self.scheduler, CFG)
+                    print(f"[VAL] epoch={epoch + 1}   FID={fid:.2f}")
+                    best_fid = min(best_fid, fid)
+                    if fid <= early_stop_fid:
+                        print("[EARLY STOP] Target FID reached – stopping training.")
+                        break
 
         wall_hours = (time.time() - start) / 3600.0
         return best_fid, wall_hours

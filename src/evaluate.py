@@ -1,16 +1,16 @@
-"""src/evaluate.py – evaluation utilities & plotting (fixed paths)"""
+"""src/evaluate.py – evaluation utilities & plotting (paths fixed to iteration27 & AMP fallback)"""
 import json, pathlib
 from typing import Dict, List, Any
 
 import torch, yaml
-from torch.cuda.amp import autocast      # CUDA-specific
+from torch import autocast
 from torch_fidelity import calculate_metrics
 import matplotlib.pyplot as plt
 import seaborn as sns
 
 # ----------  paths & config  ------------------------------------------------
 ROOT = pathlib.Path(__file__).resolve().parent.parent
-RESEARCH_DIR = ROOT / ".research" / "iteration25"
+RESEARCH_DIR = ROOT / ".research" / "iteration27"
 IMG_DIR = RESEARCH_DIR / "images"
 for p in (RESEARCH_DIR, IMG_DIR):
     p.mkdir(parents=True, exist_ok=True)
@@ -25,15 +25,17 @@ def evaluate_fid(model, val_loader, scheduler, cfg: Dict[str, Any]):
     model.eval()
     imgs = []
     total_needed = 10000
-    batch_size = val_loader.batch_size
+    batch_size = val_loader.batch_size or cfg["dataset"]["batch"]
     steps = total_needed // batch_size
+
+    amp_dtype = torch.bfloat16 if torch.cuda.is_bf16_supported() else torch.float16
 
     with torch.no_grad():
         for _ in range(steps):
             z = torch.randn(batch_size, 3, cfg["dataset"]["img_size"], cfg["dataset"]["img_size"], device="cuda")
             for i in range(20)[::-1]:
                 t = torch.full((z.size(0),), i * 50, device=z.device)
-                with autocast(dtype=torch.bfloat16):
+                with autocast("cuda", dtype=amp_dtype):
                     eps = model(z, t.float() / 1000.0)
                 alpha = scheduler.alphas_cumprod[t.long()].view(-1, 1, 1, 1).to(z.device)
                 z = (z - (1 - alpha).sqrt() * eps) / alpha.sqrt()
