@@ -1,12 +1,35 @@
+[project]
+name = "fft-dit-research"
+version = "0.1.0"
+description = "Research code for FFT-DiT diffusion model experiments"
+requires-python = ">=3.10"
+readme = "README.md"
+
+# Core runtime dependencies ---------------------------------------------------
+dependencies = [
+    "torch>=2.0,<3.0",
+    "torchvision>=0.15,<0.17",
+    "diffusers>=0.25,<0.36",
+    "flash-fft-conv",                # version chosen automatically
+    "webdataset>=0.2,<0.3",
+    "requests>=2.31,<3.0",
+    "pyyaml>=6.0,<7.0",
+    "torch-fidelity>=0.3,<0.4",
+    "open-clip-torch>=2.24,<3.0",
+    "matplotlib>=3.8,<4.0",
+    "seaborn>=0.13,<0.14",
+    "tqdm>=4.66,<5.0",
+]
+
+# -----------------------------------------------------------------------------
+# Retain the original Poetry section for local development convenience ---------
 [tool.poetry]
 name = "fft-dit-research"
 version = "0.1.0"
 description = "Research code for FFT-DiT diffusion model experiments"
 authors = ["Researcher <research@example.com>"]
 readme = "README.md"
-packages = [
-    { include = "src" }
-]
+packages = [{ include = "src" }]
 
 [tool.poetry.dependencies]
 python = "^3.10"
@@ -24,5 +47,5 @@ seaborn = "^0.13"
 tqdm = "^4.66"
 
 [build-system]
-requires = ["poetry-core>=1.5.0"]
-build-backend = "poetry.core.masonry.api"
+requires = ["setuptools>=64", "wheel"]
+build-backend = "setuptools.build_meta"

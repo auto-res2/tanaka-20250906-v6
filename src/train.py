@@ -23,7 +23,8 @@ from tqdm import tqdm
 # -----------------------------------------------------------------------------
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
-RESULT_DIR = ROOT / ".research" / "iteration1"
+# Updated directory according to new instructions ----------------------------
+RESULT_DIR = ROOT / ".research" / "iteration2"
 RESULT_DIR.mkdir(parents=True, exist_ok=True)
 IMAGES_DIR = RESULT_DIR / "images"
 IMAGES_DIR.mkdir(exist_ok=True, parents=True)
