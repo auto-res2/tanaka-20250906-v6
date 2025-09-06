@@ -14,8 +14,8 @@ ROOT = pathlib.Path(__file__).resolve().parent.parent
 CFG_FILE = ROOT / "config" / "config.yaml"
 CFG = yaml.safe_load(CFG_FILE.read_text())
 
-# research directories (same logic as other modules)
-RESEARCH_DIR = ROOT / ".research" / "iteration21"
+# research directories (iteration22)
+RESEARCH_DIR = ROOT / ".research" / "iteration22"
 IMG_DIR = RESEARCH_DIR / "images"
 for p in (RESEARCH_DIR, IMG_DIR):
     p.mkdir(parents=True, exist_ok=True)

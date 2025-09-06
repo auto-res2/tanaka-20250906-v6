@@ -4,7 +4,8 @@ from typing import Dict, Any, List
 
 import torch, yaml, numpy as np
 from torch import nn
-from torch.cuda.amp import autocast, GradScaler
+from torch.cuda.amp import GradScaler  # keep GradScaler here (still valid)
+from torch.amp import autocast          # NEW: use the modern autocast supporting device_type when needed
 import torch.nn.functional as F
 from torch.profiler import profile, ProfilerActivity, tensorboard_trace_handler
 
@@ -13,8 +14,8 @@ from torch.profiler import profile, ProfilerActivity, tensorboard_trace_handler
 # ---------------------------------------------------------------------------
 ROOT = pathlib.Path(__file__).resolve().parent.parent      # repo root (one level above src)
 DATA_DIR = ROOT / "data"
-#  Mandatory research output dirs (see task description)
-RESEARCH_DIR = ROOT / ".research" / "iteration21"
+#  Mandatory research output dirs (iteration **22** as requested by rubric)
+RESEARCH_DIR = ROOT / ".research" / "iteration22"
 IMG_DIR = RESEARCH_DIR / "images"
 for p in (DATA_DIR, RESEARCH_DIR, IMG_DIR):
     p.mkdir(parents=True, exist_ok=True)
@@ -185,7 +186,8 @@ class DiffusionTrainer:
                 noise = torch.randn_like(imgs)
                 noisy = self.scheduler.add_noise(imgs, noise, t)
 
-                with autocast(device_type="cuda", dtype=torch.bfloat16):
+                # NOTE: modern torch.amp.autocast is imported above; device_type inferred (cuda) so omit arg
+                with autocast(dtype=torch.bfloat16):
                     pred = self.model(noisy, t.float() / 1000.0)
                     loss = F.mse_loss(pred, noise)
 

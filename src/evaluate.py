@@ -3,14 +3,14 @@ import json, pathlib
 from typing import Dict, List, Any
 
 import torch, yaml
-from torch.cuda.amp import autocast
+from torch.amp import autocast   # updated import
 from torch_fidelity import calculate_metrics
 import matplotlib.pyplot as plt
 import seaborn as sns
 
 # ----------  paths & config  ------------------------------------------------
 ROOT = pathlib.Path(__file__).resolve().parent.parent
-RESEARCH_DIR = ROOT / ".research" / "iteration21"
+RESEARCH_DIR = ROOT / ".research" / "iteration22"
 IMG_DIR = RESEARCH_DIR / "images"
 for p in (RESEARCH_DIR, IMG_DIR):
     p.mkdir(parents=True, exist_ok=True)
@@ -33,7 +33,7 @@ def evaluate_fid(model, val_loader, scheduler, cfg: Dict[str, Any]):
             z = torch.randn(batch_size, 3, cfg["dataset"]["img_size"], cfg["dataset"]["img_size"], device="cuda")
             for i in range(20)[::-1]:
                 t = torch.full((z.size(0),), i * 50, device=z.device)
-                with autocast(device_type="cuda", dtype=torch.bfloat16):
+                with autocast(dtype=torch.bfloat16):   # device_type omitted
                     eps = model(z, t.float() / 1000.0)
                 alpha = scheduler.alphas_cumprod[t.long()].view(-1, 1, 1, 1).to(z.device)
                 z = (z - (1 - alpha).sqrt() * eps) / alpha.sqrt()
