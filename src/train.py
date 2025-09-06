@@ -25,8 +25,8 @@ from tqdm import tqdm
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 # Mandatory path change ───────────────────────────────────────────────────────
-# All JSON & figure artefacts must live under .research/iteration11/ …
-RESULT_DIR = ROOT / ".research" / "iteration11"  # <- updated (iteration11)
+# All JSON & figure artefacts must live under .research/iteration12/ …
+RESULT_DIR = ROOT / ".research" / "iteration12"  # <- UPDATED (iteration12)
 RESULT_DIR.mkdir(parents=True, exist_ok=True)
 IMAGES_DIR = RESULT_DIR / "images"
 IMAGES_DIR.mkdir(exist_ok=True, parents=True)
@@ -130,8 +130,20 @@ class FFTDiTWrapper(nn.Module):
             nn.Linear(1, dim // 4), nn.SiLU(), nn.Linear(dim // 4, dim)
         )
 
+    # ------------------------------------------------------------------
+    #  NOTE: We enforce dtype consistency here to avoid Float↔BF16 mismatches
+    #  outside autocast contexts (e.g. during evaluation).
+    # ------------------------------------------------------------------
     def forward(self, x: torch.Tensor, timesteps: torch.Tensor) -> Dict[str, Any]:
-        scale = self.hypernet(timesteps[:, None].float() / 1000.0).unsqueeze(1)
+        param_dtype = next(self.parameters()).dtype  # dtype of model weights
+
+        # Cast inputs to the model's dtype if necessary (prevents matmul dtype mismatch)
+        if x.dtype != param_dtype:
+            x = x.to(dtype=param_dtype)
+        if timesteps.dtype != param_dtype:
+            timesteps = timesteps.to(dtype=param_dtype)
+
+        scale = self.hypernet(timesteps[:, None] / 1000.0).unsqueeze(1)
         return self.core(x, timestep_embed=scale)  # type: ignore[arg-type]
 
 
