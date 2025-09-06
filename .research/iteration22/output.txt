@@ -1,0 +1,6 @@
+=== uv sync start Sat Sep  6 08:42:34 PM UTC 2025 ===
+=== uv install end Sat Sep  6 08:42:39 PM UTC 2025 ===
+=== experiment start Sat Sep  6 08:42:39 PM UTC 2025 ===
+[SETUP] Cloning DiT repository …
+
+==========  FFT_DIT  |  seed=13  ==========
