@@ -14,8 +14,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 import torch
 
-# Mandatory directory (same as in train.py)
-RESULT_DIR = Path(".research/iteration16")
+# Mandatory directory (iteration17)
+RESULT_DIR = Path(".research/iteration17")
 IMG_DIR = RESULT_DIR / "images"
 IMG_DIR.mkdir(parents=True, exist_ok=True)
 
@@ -100,6 +100,11 @@ def save_training_curves(history: dict[str, list[float]], out_path: Path) -> Non
     for ext in (".pdf", ".png"):
         save_path = out_path.with_suffix(ext)
         plt.savefig(save_path)
-        print(f"[Plot] Saved training curve → {save_path.relative_to(Path.cwd())}")
+        # Be defensive: printing relative path can fail if roots differ
+        try:
+            rel = save_path.relative_to(Path.cwd())
+        except ValueError:
+            rel = save_path
+        print(f"[Plot] Saved training curve → {rel}")
 
     plt.close()
