@@ -25,8 +25,8 @@ from tqdm import tqdm
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 # Mandatory path change ───────────────────────────────────────────────────────
-# All JSON & figure artefacts must live under .research/iteration10/ …
-RESULT_DIR = ROOT / ".research" / "iteration10"  # <- updated (iteration10)
+# All JSON & figure artefacts must live under .research/iteration11/ …
+RESULT_DIR = ROOT / ".research" / "iteration11"  # <- updated (iteration11)
 RESULT_DIR.mkdir(parents=True, exist_ok=True)
 IMAGES_DIR = RESULT_DIR / "images"
 IMAGES_DIR.mkdir(exist_ok=True, parents=True)
@@ -65,8 +65,8 @@ except (ImportError, AttributeError):
             def __init__(self, hidden_size: int = 256):
                 super().__init__()
                 self.config = SimpleNamespace(hidden_size=hidden_size)
-                # a single linear layer so the module has parameters / grads
-                self.proj = nn.Linear(3, 3, bias=False)
+                # Use a 1×1 convolution so inputs can be N×C×H×W (standard image tensor)
+                self.proj = nn.Conv2d(3, 3, kernel_size=1, bias=False)
 
             # The real diffusers classmethod returns a *loaded* model – here we
             # just build a fresh stub and print an informative warning.
@@ -80,9 +80,9 @@ except (ImportError, AttributeError):
                 return cls()
 
             def forward(self, x: torch.Tensor, *_, **__) -> Dict[str, torch.Tensor]:  # noqa: D401
-                # simple identity-like mapping so shapes stay intact
+                # Accept 4-D image tensor (B,C,H,W) and return same shape
                 sample = torch.tanh(self.proj(x))
-                # `loss` must require grad for `.backward()` – use mean
+                # `loss` must require grad for `.backward()` – use mean so every element contributes
                 loss = sample.mean()
                 return {"sample": sample, "loss": loss}
 
