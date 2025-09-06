@@ -1,4 +1,4 @@
-"""src/main.py – single entry-point orchestrating the whole experiment."""
+"""src/main.py – single entry-point orchestrating the whole experiment (fixed paths)"""
 import pathlib, sys, json, yaml, torch
 from typing import List, Dict, Any
 
@@ -11,13 +11,19 @@ if not torch.cuda.is_available():
 
 # -----------------  load configuration  ------------------------
 ROOT = pathlib.Path(__file__).resolve().parent.parent
-CFG_FILE = ROOT / "config" / "exp.yaml"
+CFG_FILE = ROOT / "config" / "config.yaml"
 CFG = yaml.safe_load(CFG_FILE.read_text())
+
+# research directories (same logic as other modules)
+RESEARCH_DIR = ROOT / ".research" / "iteration20"
+IMG_DIR = RESEARCH_DIR / "images"
+for p in (RESEARCH_DIR, IMG_DIR):
+    p.mkdir(parents=True, exist_ok=True)
 
 # -----------------  orchestrate  -------------------------------
 
 def main():
-    all_results: List[Dict[str,Any]] = []
+    all_results: List[Dict[str, Any]] = []
     for model_key in ("fft_dit", "dit"):
         for seed in CFG["seeds"]:
             res = run_single(model_key, seed)
@@ -25,7 +31,7 @@ def main():
 
     # plotting & consolidated JSON
     plot_fid(all_results)
-    (ROOT/"results"/"all_results.json").write_text(json.dumps(all_results, indent=2))
+    (RESEARCH_DIR / "all_results.json").write_text(json.dumps(all_results, indent=2))
     print("\n=========  FINAL RESULTS  =========")
     print(json.dumps(all_results, indent=2))
     print("Figures:\n  - fid_exp1.pdf")

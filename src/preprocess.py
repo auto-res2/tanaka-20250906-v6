@@ -1,4 +1,4 @@
-"""src/preprocess.py – dataset downloading, preprocessing, reproducibility helpers"""
+"""src/preprocess.py – dataset downloading, preprocessing, reproducibility helpers (fixed paths)"""
 import pathlib, random, yaml
 from typing import Tuple
 
@@ -7,10 +7,10 @@ from torch.utils.data import DataLoader
 from datasets import load_dataset
 
 # -----------------  paths / config  ----------------------------
-ROOT     = pathlib.Path(__file__).resolve().parent.parent
+ROOT = pathlib.Path(__file__).resolve().parent.parent
 DATA_DIR = ROOT / "data"
-CFG_FILE = ROOT / "config" / "exp.yaml"
-CFG      = yaml.safe_load(CFG_FILE.read_text())
+CFG_FILE = ROOT / "config" / "config.yaml"
+CFG = yaml.safe_load(CFG_FILE.read_text())
 DATA_DIR.mkdir(parents=True, exist_ok=True)
 
 # -----------------  helpers  ----------------------------------
@@ -22,10 +22,11 @@ _transform = torchvision.transforms.Compose([
     torchvision.transforms.Resize(CFG["dataset"]["img_size"] + 16, antialias=True),
     torchvision.transforms.CenterCrop(CFG["dataset"]["img_size"]),
     torchvision.transforms.ToTensor(),
-    torchvision.transforms.Normalize([-1, -1, -1], [2, 2, 2]),
+    # map [0,1] → [-1,1]
+    torchvision.transforms.Normalize([0.5, 0.5, 0.5], [0.5, 0.5, 0.5]),
 ])
 
-def build_dataloaders(*, batch:int, seed:int, cfg:dict):
+def build_dataloaders(*, batch: int, seed: int, cfg: dict):
     """Download (if necessary) the mini-ImageNet set from HuggingFace and build train/val loaders."""
     try:
         ds = load_dataset(cfg["dataset"]["hf_repo"], split="train", cache_dir=str(DATA_DIR))
@@ -36,7 +37,7 @@ def build_dataloaders(*, batch:int, seed:int, cfg:dict):
     train_ds, val_ds = ds["train"], ds["test"]
 
     def _map(example):
-        img   = _transform(example["img"].convert("RGB"))
+        img = _transform(example["img"].convert("RGB"))
         label = int(example["label"])
         return {"x": img, "y": torch.tensor(label, dtype=torch.long)}
 
@@ -44,13 +45,13 @@ def build_dataloaders(*, batch:int, seed:int, cfg:dict):
     val_ds.set_transform(_map)
 
     g = torch.Generator().manual_seed(seed)
-    train_loader = DataLoader(train_ds, batch_size=batch, shuffle=True,  num_workers=8, drop_last=True, generator=g, pin_memory=True)
-    val_loader   = DataLoader(val_ds,   batch_size=batch, shuffle=False, num_workers=4, pin_memory=True)
+    train_loader = DataLoader(train_ds, batch_size=batch, shuffle=True, num_workers=8, drop_last=True, generator=g, pin_memory=True)
+    val_loader = DataLoader(val_ds, batch_size=batch, shuffle=False, num_workers=4, pin_memory=True)
     return train_loader, val_loader
 
 # -----------------  reproducibility  ---------------------------
 
-def set_seed(seed:int):
+def set_seed(seed: int):
     random.seed(seed)
     import numpy as np
     np.random.seed(seed)

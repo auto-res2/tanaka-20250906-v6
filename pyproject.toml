@@ -4,15 +4,17 @@ version = "0.1.0"
 description = "Re-implementation of FFT-DiT experiment suite (structured project)"
 requires-python = ">=3.9"
 
-[project.dependencies]
-torch = "*"
-torchvision = "*"
-datasets = "*"
-pyyaml = "*"
-numpy = "*"
-matplotlib = "*"
-seaborn = "*"
-torch-fidelity = "*"
-diffusers = "*"
-open-clip-torch = "*"
-requests = "*"
+# PEP 621-compliant dependency list (array, not a table)
+dependencies = [
+    "torch",
+    "torchvision",
+    "datasets",
+    "pyyaml",
+    "numpy",
+    "matplotlib",
+    "seaborn",
+    "torch-fidelity",
+    "diffusers",
+    "open-clip-torch",
+    "requests",
+]
