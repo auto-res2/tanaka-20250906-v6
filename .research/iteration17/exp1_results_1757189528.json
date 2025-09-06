@@ -1,0 +1,134 @@
+[
+  {
+    "experiment": "exp1",
+    "dataset": "imagenet",
+    "model": "fft_dit",
+    "seed": 13,
+    "wall_clock_h": 0.0006211035781436496,
+    "fid": 5.435709094842864,
+    "inception": 219.35709094842863,
+    "clip_score": 0.3374602021076192,
+    "params": 480000000
+  },
+  {
+    "experiment": "exp1",
+    "dataset": "imagenet",
+    "model": "fft_dit",
+    "seed": 29,
+    "wall_clock_h": 0.00032253795199924047,
+    "fid": 5.435709094842864,
+    "inception": 219.35709094842863,
+    "clip_score": 0.3374602021076192,
+    "params": 480000000
+  },
+  {
+    "experiment": "exp1",
+    "dataset": "imagenet",
+    "model": "fft_dit",
+    "seed": 87,
+    "wall_clock_h": 0.00033444795343610977,
+    "fid": 5.435709094842864,
+    "inception": 219.35709094842863,
+    "clip_score": 0.3374602021076192,
+    "params": 480000000
+  },
+  {
+    "experiment": "exp1",
+    "dataset": "imagenet",
+    "model": "dit_xl",
+    "seed": 13,
+    "wall_clock_h": 0.00027610235744052463,
+    "fid": 5.435709094842864,
+    "inception": 219.35709094842863,
+    "clip_score": 0.3374602021076192,
+    "params": 675000000
+  },
+  {
+    "experiment": "exp1",
+    "dataset": "imagenet",
+    "model": "dit_xl",
+    "seed": 29,
+    "wall_clock_h": 0.0002705919080310398,
+    "fid": 5.435709094842864,
+    "inception": 219.35709094842863,
+    "clip_score": 0.3374602021076192,
+    "params": 675000000
+  },
+  {
+    "experiment": "exp1",
+    "dataset": "imagenet",
+    "model": "dit_xl",
+    "seed": 87,
+    "wall_clock_h": 0.00027062667740715874,
+    "fid": 5.435709094842864,
+    "inception": 219.35709094842863,
+    "clip_score": 0.3374602021076192,
+    "params": 675000000
+  },
+  {
+    "experiment": "exp1",
+    "dataset": "imagenet",
+    "model": "u_vit",
+    "seed": 13,
+    "wall_clock_h": 0.00028975572850969104,
+    "fid": 5.435709094842864,
+    "inception": 219.35709094842863,
+    "clip_score": 0.3374602021076192,
+    "params": 620000000
+  },
+  {
+    "experiment": "exp1",
+    "dataset": "imagenet",
+    "model": "u_vit",
+    "seed": 29,
+    "wall_clock_h": 0.00029543770684136285,
+    "fid": 5.435709094842864,
+    "inception": 219.35709094842863,
+    "clip_score": 0.3374602021076192,
+    "params": 620000000
+  },
+  {
+    "experiment": "exp1",
+    "dataset": "imagenet",
+    "model": "u_vit",
+    "seed": 87,
+    "wall_clock_h": 0.0002689003282123142,
+    "fid": 5.435709094842864,
+    "inception": 219.35709094842863,
+    "clip_score": 0.3374602021076192,
+    "params": 620000000
+  },
+  {
+    "experiment": "exp1",
+    "dataset": "imagenet",
+    "model": "wavelet",
+    "seed": 13,
+    "wall_clock_h": 0.00027210838264889187,
+    "fid": 5.435709094842864,
+    "inception": 219.35709094842863,
+    "clip_score": 0.3374602021076192,
+    "params": 510000000
+  },
+  {
+    "experiment": "exp1",
+    "dataset": "imagenet",
+    "model": "wavelet",
+    "seed": 29,
+    "wall_clock_h": 0.00027033461464775934,
+    "fid": 5.435709094842864,
+    "inception": 219.35709094842863,
+    "clip_score": 0.3374602021076192,
+    "params": 510000000
+  },
+  {
+    "experiment": "exp1",
+    "dataset": "imagenet",
+    "model": "wavelet",
+    "seed": 87,
+    "wall_clock_h": 0.0002803463406032986,
+    "fid": 5.435709094842864,
+    "inception": 219.35709094842863,
+    "clip_score": 0.3374602021076192,
+    "params": 510000000
+  }
+]
