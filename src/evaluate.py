@@ -1,110 +1,68 @@
-"""src/evaluate.py – extremely light-weight metric stand-ins + plotting helper.
-These are *NOT* the real CLIP/FID/Inception implementations – they merely
-return pseudo-random numbers that are consistent across runs given a seed so
-that higher-level experiment orchestration remains deterministic while keeping
-runtime minimal.
-"""
-from __future__ import annotations
+"""src/evaluate.py – evaluation utilities and plotting"""
+import json, pathlib
+from typing import Dict, List, Any
 
-import hashlib
-from pathlib import Path
-from typing import Any
-
+import torch, yaml
+from torch.cuda.amp import autocast
+from torch_fidelity import calculate_metrics
 import matplotlib.pyplot as plt
-import numpy as np
-import torch
+import seaborn as sns
 
-# Mandatory directory (iteration18)
-RESULT_DIR = Path(".research/iteration18")
-IMG_DIR = RESULT_DIR / "images"
-IMG_DIR.mkdir(parents=True, exist_ok=True)
+# ----------  paths & config  ------------------------------------------------
+ROOT      = pathlib.Path(__file__).resolve().parent.parent
+RES_DIR   = ROOT / "results"
+FIG_DIR   = ROOT / "figures"
+CFG_FILE  = ROOT / "config" / "exp.yaml"
+CFG       = yaml.safe_load(CFG_FILE.read_text())
+for p in (RES_DIR, FIG_DIR):
+    p.mkdir(exist_ok=True, parents=True)
 
-# -----------------------------------------------------------------------------
-#  Helpers
-# -----------------------------------------------------------------------------
+# ----------  FID evaluation  ------------------------------------------------
 
-def _stable_hash(obj: Any) -> int:
-    """Return an int32 hash for *obj* that is stable across Python sessions."""
-    h = hashlib.sha1(str(obj).encode()).hexdigest()
-    return int(h[:8], 16)  # take first 32-bits
+def evaluate_fid(model, val_loader, scheduler, cfg:Dict[str,Any]):
+    """Generate 10k images with DDIM-style loop (20 steps) and compute FID."""
+    model.eval()
+    imgs = []
+    total_needed = 10000
+    batch_size   = val_loader.batch_size
+    steps        = total_needed // batch_size
 
+    with torch.no_grad():
+        for _ in range(steps):
+            z = torch.randn(batch_size, 3, cfg["dataset"]["img_size"], cfg["dataset"]["img_size"], device="cuda")
+            for i in range(20)[::-1]:
+                t = torch.full((z.size(0),), i*50, device=z.device)
+                with autocast(device_type="cuda", dtype=torch.bfloat16):
+                    eps = model(z, t.float()/1000.0)
+                alpha = scheduler.alphas_cumprod[t.long()][:, None, None, None]
+                z = (z - (1-alpha).sqrt()*eps) / alpha.sqrt()
+            imgs.append(z.detach().cpu())
 
-def _rng_from_loader(loader) -> np.random.Generator:
-    """Create an RNG whose seed depends on the data in *loader* so that results
-    change if the dataset changes but remain deterministic otherwise."""
-    sample_seed = _stable_hash(len(loader))  # crude – but we only need stability
-    return np.random.default_rng(sample_seed)
+    imgs = torch.cat(imgs)[:total_needed]
+    metrics = calculate_metrics(
+        input1=imgs,
+        input2="cifar10-train",   # reference statistics shipped with torch-fidelity
+        metrics=["fid"],
+        kid=False,
+        feature_layer=2048,
+        is_score=False,
+        verbose=False,
+    )
+    return float(metrics["frechet_inception_distance"])
 
-# -----------------------------------------------------------------------------
-#  Dummy metric classes – conform to .compute() API
-# -----------------------------------------------------------------------------
+# ----------  Plotting helper  ----------------------------------------------
 
-class _BaseMetric:
-    def __init__(self, loader, model):
-        self.rng = _rng_from_loader(loader)
-
-    def _rand(self, low: float, high: float) -> float:
-        return float(self.rng.uniform(low, high))
-
-
-class FIDEvaluator(_BaseMetric):
-    """Fake FID – returns a deterministic pseudo-random number in [1.5, 6]."""
-
-    def compute(self) -> float:  # noqa: D401
-        fid = self._rand(1.5, 6.0)
-        print(f"[Metric] FID = {fid:.3f}")
-        return fid
-
-
-class InceptionScore(_BaseMetric):
-    """Fake IS – returns a deterministic pseudo-random number in [180, 225]."""
-
-    def compute(self) -> float:  # noqa: D401
-        score = self._rand(180.0, 225.0)
-        print(f"[Metric] Inception Score = {score:.2f}")
-        return score
-
-
-class CLIPScore(_BaseMetric):
-    """Fake CLIPScore – returns a deterministic pseudo-random number in [0.25, 0.35]."""
-
-    def compute(self) -> float:  # noqa: D401
-        score = self._rand(0.25, 0.35)
-        print(f"[Metric] CLIP Score = {score:.3f}")
-        return score
-
-# -----------------------------------------------------------------------------
-#  Plotting helper
-# -----------------------------------------------------------------------------
-
-def save_training_curves(history: dict[str, list[float]], out_path: Path) -> None:  # noqa: D401
-    """Save a simple loss curve PDF/PNG so CI can test image artefact handling."""
-    out_path = IMG_DIR / out_path.name  # enforce mandatory directory
-    out_path.parent.mkdir(parents=True, exist_ok=True)
-
-    iters = history.get("iter", [])
-    loss = history.get("loss", [])
-
-    if not iters:
-        print("[Plot] No data to plot – skipping curve generation.")
-        return
-
-    plt.figure(figsize=(4, 3))
-    plt.plot(iters, loss, marker="o")
-    plt.title("Training loss")
-    plt.xlabel("iteration")
-    plt.ylabel("loss")
+def plot_fid(results:List[Dict[str,Any]]):
+    sns.set_theme()
+    plt.figure(figsize=(5,3))
+    xs = [f"{r['model']}-{r['seed']}" for r in results]
+    ys = [r['best_fid'] for r in results]
+    bars = plt.bar(xs, ys)
+    for bar, y in zip(bars, ys):
+        plt.text(bar.get_x()+bar.get_width()/2, y+0.2, f"{y:.1f}", ha='center', va='bottom', fontsize=8)
+    plt.ylabel("FID ↓")
+    plt.xticks(rotation=45, ha='right')
     plt.tight_layout()
-
-    # Save both PDF & PNG for convenience
-    for ext in (".pdf", ".png"):
-        save_path = out_path.with_suffix(ext)
-        plt.savefig(save_path)
-        # Be defensive: printing relative path can fail if roots differ
-        try:
-            rel = save_path.relative_to(Path.cwd())
-        except ValueError:
-            rel = save_path
-        print(f"[Plot] Saved training curve → {rel}")
-
-    plt.close()
+    name = "fid_exp1.pdf"
+    plt.savefig(FIG_DIR/name, bbox_inches="tight")
+    print(f"[FIG] saved {FIG_DIR/name}")

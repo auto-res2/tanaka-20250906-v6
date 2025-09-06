@@ -1,53 +1,18 @@
 [project]
-name = "fft-dit-research"
+name = "fft-dit-experiment"
 version = "0.1.0"
-description = "Research code for FFT-DiT diffusion model experiments"
-requires-python = ">=3.10"
-readme = "README.md"
+description = "Re-implementation of FFT-DiT experiment suite (structured project)"
+requires-python = ">=3.9"
 
-# Core runtime dependencies ---------------------------------------------------
-dependencies = [
-    "numpy>=1.23,<2.0",                 # pin <2 to avoid ABI issues with compiled deps
-    "torch>=2.1,<2.2",                  # align with CUDA 12.x builds on the execution env
-    "torchvision>=0.16,<0.17",          # must match PyTorch 2.1 series
-    "diffusers>=0.25,<0.36",
-    # flash-fft-conv removed – it's optional and not on PyPI; code falls back gracefully
-    "webdataset>=0.2,<0.3",
-    "requests>=2.31,<3.0",
-    "pyyaml>=6.0,<7.0",
-    "torch-fidelity>=0.3,<0.4",
-    "open-clip-torch>=2.24,<3.0",
-    "matplotlib>=3.8,<4.0",
-    "seaborn>=0.13,<0.14",
-    "tqdm>=4.66,<5.0",
-]
-
-# -----------------------------------------------------------------------------
-# Retain the original Poetry section for local development convenience ---------
-[tool.poetry]
-name = "fft-dit-research"
-version = "0.1.0"
-description = "Research code for FFT-DiT diffusion model experiments"
-authors = ["Researcher <research@example.com>"]
-readme = "README.md"
-packages = [{ include = "src" }]
-
-[tool.poetry.dependencies]
-python = "^3.10"
-numpy = "^1.26"
-torch = "^2.1"
-torchvision = "^0.16"
-diffusers = "^0.25"
-# flash-fft-conv intentionally omitted
-webdataset = "^0.2"
-requests = "^2.31"
-pyyaml = "^6.0"
-torch-fidelity = "^0.3"
-open-clip-torch = "^2.24"
-matplotlib = "^3.8"
-seaborn = "^0.13"
-tqdm = "^4.66"
-
-[build-system]
-requires = ["setuptools>=64", "wheel"]
-build-backend = "setuptools.build_meta"
+[project.dependencies]
+torch = "*"
+torchvision = "*"
+datasets = "*"
+pyyaml = "*"
+numpy = "*"
+matplotlib = "*"
+seaborn = "*"
+torch-fidelity = "*"
+diffusers = "*"
+open-clip-torch = "*"
+requests = "*"

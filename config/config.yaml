@@ -1,9 +1,37 @@
-# Default user-editable configuration for FFT-DiT experiments
-exp: exp1          # currently only exp1 is available
-seed: 13
-num_seeds: 3
-device: cuda       # set to "cpu" for debugging
-
-# Training hyper-parameters
-img_size: 256
-global_batch: 2048
+dataset:
+  name: imagenet-mini
+  hf_repo: timm/mini-imagenet
+  split: train
+  img_size: 128
+  val_split: 0.1
+  batch: 256
+experiment: exp1
+seeds:
+- 13
+- 29
+- 87
+device: cuda
+max_epochs: 50
+early_stop_fid: 11.0
+profile_batches: 100
+mixed_precision: bf16
+models:
+  fft_dit:
+    depth: 12
+    width: 768
+    heads: 12
+    low_tokens: 64
+    high_tokens: 64
+    adapter_rank: 32
+    lr: 0.00015
+    weight_decay: 0.02
+  dit:
+    depth: 12
+    width: 768
+    heads: 12
+    lr: 0.00015
+    weight_decay: 0.02
+  wavediff:
+    checkpoint: VinAIResearch/WaveDiff
+    lr: 0.00015
+    weight_decay: 0.02
