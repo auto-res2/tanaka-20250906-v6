@@ -1,0 +1,21 @@
+=== uv sync start Sat Sep  6 06:44:48 PM UTC 2025 ===
+=== uv install end Sat Sep  6 06:44:54 PM UTC 2025 ===
+=== experiment start Sat Sep  6 06:44:54 PM UTC 2025 ===
+=================  FFT-DiT EXPERIMENT SUITE  =================
+{
+  "exp": "exp1",
+  "seed": 13,
+  "num_seeds": 3,
+  "device": "cuda",
+  "img_size": 256,
+  "global_batch": 2048
+}
+
+=====  FFT_DIT  |  seed=13  =====
+[imagenet] attempting → https://huggingface.co/datasets/mlx-vision/imagenet-1k/resolve/main/train/000000.tar
+[imagenet] attempting → https://huggingface.co/datasets/dark-xet/imagenet-1k-wds/resolve/main/train/000000.tar
+[WARNING] Failed to download shard 0 of train from all mirrors – aborting download.
+
+[INFO] Remote ImageNet shards unavailable – using synthetic data for this run.
+
+[WARNING] diffusers.DiTModel is unavailable – using a minimal dummy implementation.  Install diffusers<0.35 for full functionality.
