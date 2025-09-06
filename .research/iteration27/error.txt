@@ -1,0 +1,118 @@
+Using CPython 3.11.13
+Creating virtual environment at: .venv
+Resolved 88 packages in 555ms
+Installed 74 packages in 4.79s
+ + aiohappyeyeballs==2.6.1
+ + aiohttp==3.12.15
+ + aiosignal==1.4.0
+ + attrs==25.3.0
+ + certifi==2025.8.3
+ + charset-normalizer==3.4.3
+ + contourpy==1.3.3
+ + cycler==0.12.1
+ + datasets==4.0.0
+ + diffusers==0.35.1
+ + dill==0.3.8
+ + filelock==3.19.1
+ + fonttools==4.59.2
+ + frozenlist==1.7.0
+ + fsspec==2025.3.0
+ + ftfy==6.3.1
+ + hf-xet==1.1.9
+ + huggingface-hub==0.34.4
+ + idna==3.10
+ + importlib-metadata==8.7.0
+ + jinja2==3.1.6
+ + kiwisolver==1.4.9
+ + markupsafe==3.0.2
+ + matplotlib==3.10.6
+ + mpmath==1.3.0
+ + multidict==6.6.4
+ + multiprocess==0.70.16
+ + networkx==3.5
+ + numpy==2.3.2
+ + nvidia-cublas-cu12==12.8.4.1
+ + nvidia-cuda-cupti-cu12==12.8.90
+ + nvidia-cuda-nvrtc-cu12==12.8.93
+ + nvidia-cuda-runtime-cu12==12.8.90
+ + nvidia-cudnn-cu12==9.10.2.21
+ + nvidia-cufft-cu12==11.3.3.83
+ + nvidia-cufile-cu12==1.13.1.3
+ + nvidia-curand-cu12==10.3.9.90
+ + nvidia-cusolver-cu12==11.7.3.90
+ + nvidia-cusparse-cu12==12.5.8.93
+ + nvidia-cusparselt-cu12==0.7.1
+ + nvidia-nccl-cu12==2.27.3
+ + nvidia-nvjitlink-cu12==12.8.93
+ + nvidia-nvtx-cu12==12.8.90
+ + open-clip-torch==3.1.0
+ + packaging==25.0
+ + pandas==2.3.2
+ + pillow==11.3.0
+ + propcache==0.3.2
+ + pyarrow==21.0.0
+ + pyparsing==3.2.3
+ + python-dateutil==2.9.0.post0
+ + pytz==2025.2
+ + pyyaml==6.0.2
+ + regex==2025.9.1
+ + requests==2.32.5
+ + safetensors==0.6.2
+ + scipy==1.16.1
+ + seaborn==0.13.2
+ + setuptools==80.9.0
+ + six==1.17.0
+ + sympy==1.14.0
+ + timm==1.0.19
+ + torch==2.8.0
+ + torch-fidelity==0.3.0
+ + torchvision==0.23.0
+ + tqdm==4.67.1
+ + triton==3.4.0
+ + typing-extensions==4.15.0
+ + tzdata==2025.2
+ + urllib3==2.5.0
+ + wcwidth==0.2.13
+ + xxhash==3.5.0
+ + yarl==1.20.1
+ + zipp==3.23.0
+Cloning into '/home/toma/actions-runner-3/_work/tanaka-20250906-v6/tanaka-20250906-v6/third_party/DiT'...
+Generating train split:   0%|          | 0/50000 [00:00<?, ? examples/s]Generating train split:   1%|          | 400/50000 [00:00<00:17, 2769.95 examples/s]Generating train split:   2%|▏         | 900/50000 [00:00<00:13, 3712.96 examples/s]Generating train split:   3%|▎         | 1500/50000 [00:00<00:12, 4034.88 examples/s]Generating train split:   4%|▍         | 2200/50000 [00:00<00:10, 4532.14 examples/s]Generating train split:   6%|▌         | 2900/50000 [00:00<00:10, 4545.68 examples/s]Generating train split:   7%|▋         | 3600/50000 [00:00<00:10, 4422.02 examples/s]Generating train split:   8%|▊         | 4147/50000 [00:01<00:26, 1752.55 examples/s]Generating train split:  11%|█▏        | 5747/50000 [00:01<00:13, 3346.60 examples/s]Generating train split:  14%|█▍        | 7247/50000 [00:01<00:08, 4924.05 examples/s]Generating train split:  17%|█▋        | 8494/50000 [00:01<00:07, 5845.42 examples/s]Generating train split:  19%|█▉        | 9594/50000 [00:02<00:14, 2735.43 examples/s]Generating train split:  22%|██▏       | 10894/50000 [00:03<00:10, 3663.73 examples/s]Generating train split:  24%|██▍       | 12140/50000 [00:03<00:08, 4377.35 examples/s]Generating train split:  26%|██▌       | 13040/50000 [00:03<00:07, 4919.00 examples/s]Generating train split:  28%|██▊       | 13940/50000 [00:03<00:07, 5039.93 examples/s]Generating train split:  30%|███       | 15040/50000 [00:04<00:12, 2786.07 examples/s]Generating train split:  32%|███▏      | 15986/50000 [00:04<00:10, 3252.48 examples/s]Generating train split:  34%|███▍      | 17186/50000 [00:04<00:07, 4242.52 examples/s]Generating train split:  36%|███▌      | 18086/50000 [00:04<00:07, 4362.96 examples/s]Generating train split:  38%|███▊      | 19186/50000 [00:05<00:11, 2597.85 examples/s]Generating train split:  40%|███▉      | 19932/50000 [00:05<00:10, 2874.95 examples/s]Generating train split:  41%|████▏     | 20632/50000 [00:05<00:08, 3309.72 examples/s]Generating train split:  43%|████▎     | 21332/50000 [00:05<00:07, 3701.75 examples/s]Generating train split:  44%|████▍     | 21932/50000 [00:05<00:06, 4029.23 examples/s]Generating train split:  45%|████▌     | 22632/50000 [00:06<00:12, 2106.83 examples/s]Generating train split:  48%|████▊     | 23978/50000 [00:06<00:07, 3272.59 examples/s]Generating train split:  50%|████▉     | 24978/50000 [00:06<00:06, 4135.21 examples/s]Generating train split:  53%|█████▎    | 26278/50000 [00:07<00:05, 4732.52 examples/s]Generating train split:  55%|█████▍    | 27324/50000 [00:07<00:08, 2801.13 examples/s]Generating train split:  57%|█████▋    | 28524/50000 [00:08<00:05, 3704.93 examples/s]Generating train split:  60%|█████▉    | 29924/50000 [00:08<00:04, 4996.04 examples/s]Generating train split:  63%|██████▎   | 31470/50000 [00:08<00:02, 6270.40 examples/s]Generating train split:  65%|██████▌   | 32670/50000 [00:09<00:06, 2867.50 examples/s]Generating train split:  68%|██████▊   | 33870/50000 [00:09<00:04, 3660.09 examples/s]Generating train split:  70%|██████▉   | 34816/50000 [00:09<00:03, 4232.46 examples/s]Generating train split:  71%|███████▏  | 35716/50000 [00:09<00:03, 4729.49 examples/s]Generating train split:  73%|███████▎  | 36716/50000 [00:09<00:02, 4889.01 examples/s]Generating train split:  76%|███████▌  | 37916/50000 [00:10<00:04, 2701.11 examples/s]Generating train split:  77%|███████▋  | 38562/50000 [00:10<00:03, 2975.20 examples/s]Generating train split:  78%|███████▊  | 39162/50000 [00:10<00:03, 3228.80 examples/s]Generating train split:  80%|███████▉  | 39862/50000 [00:11<00:03, 3360.13 examples/s]Generating train split:  81%|████████  | 40462/50000 [00:11<00:02, 3717.98 examples/s]Generating train split:  82%|████████▏ | 41062/50000 [00:11<00:02, 3948.11 examples/s]Generating train split:  83%|████████▎ | 41662/50000 [00:11<00:04, 2019.58 examples/s]Generating train split:  85%|████████▍ | 42408/50000 [00:12<00:02, 2600.03 examples/s]Generating train split:  87%|████████▋ | 43608/50000 [00:12<00:01, 3784.52 examples/s]Generating train split:  89%|████████▉ | 44508/50000 [00:12<00:01, 4452.24 examples/s]Generating train split:  91%|█████████ | 45508/50000 [00:13<00:02, 2145.08 examples/s]Generating train split:  93%|█████████▎| 46354/50000 [00:13<00:01, 2704.53 examples/s]Generating train split:  94%|█████████▍| 47054/50000 [00:13<00:00, 3177.77 examples/s]Generating train split:  95%|█████████▌| 47654/50000 [00:13<00:00, 3562.19 examples/s]Generating train split:  97%|█████████▋| 48354/50000 [00:13<00:00, 3912.74 examples/s]Generating train split:  98%|█████████▊| 49054/50000 [00:13<00:00, 4015.29 examples/s]Generating train split: 100%|█████████▉| 49854/50000 [00:14<00:00, 1728.68 examples/s]Generating train split: 100%|██████████| 50000/50000 [00:15<00:00, 3314.34 examples/s]
+Generating validation split:   0%|          | 0/10000 [00:00<?, ? examples/s]Generating validation split:   5%|▌         | 500/10000 [00:00<00:01, 4756.48 examples/s]Generating validation split:  15%|█▌        | 1500/10000 [00:00<00:01, 7432.93 examples/s]Generating validation split:  24%|██▍       | 2400/10000 [00:00<00:00, 7608.25 examples/s]Generating validation split:  34%|███▍      | 3434/10000 [00:00<00:00, 6703.63 examples/s]Generating validation split:  45%|████▌     | 4534/10000 [00:01<00:02, 2576.64 examples/s]Generating validation split:  59%|█████▉    | 5934/10000 [00:01<00:01, 3868.10 examples/s]Generating validation split:  69%|██████▊   | 6867/10000 [00:01<00:00, 4594.24 examples/s]Generating validation split:  77%|███████▋  | 7667/10000 [00:01<00:00, 4968.15 examples/s]Generating validation split:  88%|████████▊ | 8767/10000 [00:01<00:00, 5086.05 examples/s]Generating validation split:  98%|█████████▊| 9767/10000 [00:02<00:00, 2247.36 examples/s]Generating validation split: 100%|██████████| 10000/10000 [00:03<00:00, 3270.23 examples/s]
+Generating test split:   0%|          | 0/5000 [00:00<?, ? examples/s]Generating test split:   8%|▊         | 400/5000 [00:00<00:01, 3386.97 examples/s]Generating test split:  18%|█▊        | 900/5000 [00:00<00:00, 4160.95 examples/s]Generating test split:  32%|███▏      | 1600/5000 [00:00<00:00, 5133.18 examples/s]Generating test split:  52%|█████▏    | 2600/5000 [00:00<00:00, 5663.67 examples/s]Generating test split:  64%|██████▍   | 3200/5000 [00:00<00:00, 5232.83 examples/s]Generating test split:  76%|███████▌  | 3800/5000 [00:00<00:00, 5332.48 examples/s]Generating test split:  90%|█████████ | 4500/5000 [00:01<00:00, 2040.06 examples/s]Generating test split: 100%|██████████| 5000/5000 [00:01<00:00, 2870.75 examples/s]
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "/home/toma/actions-runner-3/_work/tanaka-20250906-v6/tanaka-20250906-v6/src/main.py", line 40, in <module>
+    main()
+  File "/home/toma/actions-runner-3/_work/tanaka-20250906-v6/tanaka-20250906-v6/src/main.py", line 29, in main
+    res = run_single(model_key, seed)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/toma/actions-runner-3/_work/tanaka-20250906-v6/tanaka-20250906-v6/src/train.py", line 268, in run_single
+    fid, wall = trainer.train(train_loader, val_loader, f"{model_key}_s{seed}")
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/toma/actions-runner-3/_work/tanaka-20250906-v6/tanaka-20250906-v6/src/train.py", line 218, in train
+    pred = self.model(noisy, t.float() / 1000.0)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/toma/actions-runner-3/_work/tanaka-20250906-v6/tanaka-20250906-v6/.venv/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1773, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/toma/actions-runner-3/_work/tanaka-20250906-v6/tanaka-20250906-v6/.venv/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1784, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/toma/actions-runner-3/_work/tanaka-20250906-v6/tanaka-20250906-v6/src/train.py", line 129, in forward
+    x = blk(x, c)
+        ^^^^^^^^^
+  File "/home/toma/actions-runner-3/_work/tanaka-20250906-v6/tanaka-20250906-v6/.venv/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1773, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/toma/actions-runner-3/_work/tanaka-20250906-v6/tanaka-20250906-v6/.venv/lib/python3.11/site-packages/torch/nn/modules/module.py", line 1784, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/toma/actions-runner-3/_work/tanaka-20250906-v6/tanaka-20250906-v6/third_party/DiT/models.py", line 121, in forward
+    x = x + gate_mlp.unsqueeze(1) * self.mlp(modulate(self.norm2(x), shift_mlp, scale_mlp))
+                                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/toma/actions-runner-3/_work/tanaka-20250906-v6/tanaka-20250906-v6/third_party/DiT/models.py", line 20, in modulate
+    return x * (1 + scale.unsqueeze(1)) + shift.unsqueeze(1)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~~~~~~~~~~~
+torch.OutOfMemoryError: CUDA out of memory. Tried to allocate 768.00 MiB. GPU 0 has a total capacity of 79.15 GiB of which 579.62 MiB is free. Including non-PyTorch memory, this process has 78.57 GiB memory in use. Of the allocated memory 77.96 GiB is allocated by PyTorch, and 110.01 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://pytorch.org/docs/stable/notes/cuda.html#environment-variables)
