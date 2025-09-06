@@ -1,6 +1,10 @@
-"""src/evaluate.py – evaluation utilities & plotting (paths fixed to iteration28 & AMP fallback)"""
-import json, pathlib
+"""src/evaluate.py – evaluation utilities & plotting
+(updated to iteration29 paths + headless Agg backend)"""
+import json, pathlib, matplotlib
 from typing import Dict, List, Any
+
+# Use a non-interactive backend to avoid display issues in headless CI
+matplotlib.use("Agg")
 
 import torch, yaml
 from torch import autocast
@@ -10,7 +14,7 @@ import seaborn as sns
 
 # ----------  paths & config  ------------------------------------------------
 ROOT = pathlib.Path(__file__).resolve().parent.parent
-RESEARCH_DIR = ROOT / ".research" / "iteration28"
+RESEARCH_DIR = ROOT / ".research" / "iteration29"
 IMG_DIR = RESEARCH_DIR / "images"
 for p in (RESEARCH_DIR, IMG_DIR):
     p.mkdir(parents=True, exist_ok=True)
@@ -34,10 +38,12 @@ def evaluate_fid(model, val_loader, scheduler, cfg: Dict[str, Any]):
         for _ in range(steps):
             z = torch.randn(batch_size, 3, cfg["dataset"]["img_size"], cfg["dataset"]["img_size"], device="cuda")
             for i in range(20)[::-1]:
-                t = torch.full((z.size(0),), i * 50, device=z.device)
+                t_val = i * 50
+                t = torch.full((z.size(0),), t_val, device=z.device)
                 with autocast("cuda", dtype=amp_dtype):
                     eps = model(z, t.float() / 1000.0)
-                alpha = scheduler.alphas_cumprod[t.long()].view(-1, 1, 1, 1).to(z.device)
+                alpha = scheduler.alphas_cumprod[t_val].to(z.device)  # scalar per step
+                alpha = alpha.view(1, 1, 1, 1)
                 z = (z - (1 - alpha).sqrt() * eps) / alpha.sqrt()
             imgs.append(z.detach().cpu())
 

@@ -1,26 +1,33 @@
-"""src/train.py – model definitions, training loop, per-run execution (paths fixed to iteration28 & micro-batch OOM patch)"""
+"""src/train.py – model definitions, training loop, per-run execution
+(updated to iteration29 paths + resilient AMP import)"""
 import json, pathlib, random, shutil, subprocess, sys, time, os, contextlib
 from typing import Dict, Any, List
 
 import torch, yaml, numpy as np
 from torch import nn
-# modern AMP API -------------------------------------------------------------
-from torch import autocast                         # torch.autocast("cuda", …)
-from torch.amp import GradScaler                   # new location (cuda-agnostic)
+# --------------------------  AMP helpers  ---------------------------------
+# GradScaler recently moved to torch.amp but remains in torch.cuda.amp for
+# older PyTorch releases.  We import from the new location first and   
+# transparently fall-back to the classic path to maximise compatibility.
+try:
+    from torch.amp import GradScaler            # PyTorch ≥2.1
+except (ImportError, AttributeError):           # older versions
+    from torch.cuda.amp import GradScaler       # type: ignore
+
+from torch import autocast                       # torch.autocast("cuda", …)
 import torch.nn.functional as F
 
 # ---------------------------------------------------------------------------
-#  Repository paths
+#  Repository paths (NOTE: iteration **29** as mandated)
 # ---------------------------------------------------------------------------
 ROOT = pathlib.Path(__file__).resolve().parent.parent      # repo root
 DATA_DIR = ROOT / "data"
-#  MANDATORY research output dir (iteration **28**)
-RESEARCH_DIR = ROOT / ".research" / "iteration28"
+RESEARCH_DIR = ROOT / ".research" / "iteration29"
 IMG_DIR = RESEARCH_DIR / "images"
 for p in (DATA_DIR, RESEARCH_DIR, IMG_DIR):
     p.mkdir(parents=True, exist_ok=True)
 
-# legacy aliases ----------------------------------------------------------------
+# legacy aliases ------------------------------------------------------------
 RES_DIR = RESEARCH_DIR   # JSON, traces, etc.
 FIG_DIR = IMG_DIR        # figures / images
 
@@ -289,5 +296,6 @@ def run_single(model_key: str, seed: int) -> Dict[str, Any]:
     }
     jpath = RES_DIR / f"{model_key}_s{seed}.json"
     jpath.write_text(json.dumps(res, indent=2))
+    # Immediate stdout for CI log parsing / verification
     print(json.dumps(res, indent=2))
     return res
