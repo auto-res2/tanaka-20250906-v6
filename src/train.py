@@ -1,3 +1,5 @@
+[UPDATED_FILE]
+```python
 """src/train.py – model creation and training utilities for FFT-DiT experiments
 All heavy-lifting (model definition, FSDP trainer, seed helpers) lives here so
 that the other modules can stay lightweight.  Nothing outside the six allowed
@@ -23,8 +25,8 @@ from tqdm import tqdm
 # -----------------------------------------------------------------------------
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
-# Updated directory according to new instructions ----------------------------
-RESULT_DIR = ROOT / ".research" / "iteration2"
+# Updated directory according to the NEW mandatory instructions ---------------
+RESULT_DIR = ROOT / ".research" / "iteration3"
 RESULT_DIR.mkdir(parents=True, exist_ok=True)
 IMAGES_DIR = RESULT_DIR / "images"
 IMAGES_DIR.mkdir(exist_ok=True, parents=True)
@@ -47,9 +49,10 @@ try:
 except ModuleNotFoundError as exc:  # pragma: no cover
     raise ModuleNotFoundError("diffusers is required:  pip install diffusers") from exc
 
+# flash-fft-conv is strictly optional – fall back gracefully if missing
 try:
     from flash_fft_conv import fft_conv  # noqa: F401  – import just to assert availability
-except ModuleNotFoundError:  # optional speed-up, fall back gracefully
+except ModuleNotFoundError:  # optional speed-up only
     fft_conv = None  # type: ignore
 
 
@@ -78,7 +81,7 @@ class FFTDiTWrapper(nn.Module):
         adapter = SpectralAdapter(dim, rank=adapter_rank)
         for module in self.core.modules():
             if isinstance(module, nn.TransformerEncoderLayer):
-                module.register_forward_hook(lambda m, inp, out, a=adapter: a(out))
+                module.register_forward_hook(lambda _m, _inp, out, a=adapter: a(out))
 
         self.hypernet = nn.Sequential(  # small FiLM-like conditioning
             nn.Linear(1, dim // 4), nn.SiLU(), nn.Linear(dim // 4, dim)
@@ -91,7 +94,8 @@ class FFTDiTWrapper(nn.Module):
 
 def create_model(img_size: int, device: str = "cuda") -> FFTDiTWrapper:
     model = FFTDiTWrapper(img_size)
-    return model.to(device=device, dtype=torch.bfloat16 if torch.cuda.is_available() else torch.float32)
+    dtype = torch.bfloat16 if torch.cuda.is_available() else torch.float32
+    return model.to(device=device, dtype=dtype)
 
 
 # -----------------------------------------------------------------------------
@@ -192,3 +196,4 @@ def save_json(obj: Any, path: pathlib.Path | str) -> None:  # noqa: D401
     path.parent.mkdir(parents=True, exist_ok=True)
     with path.open("w") as handle:
         json.dump(obj, handle, indent=2)
+```
