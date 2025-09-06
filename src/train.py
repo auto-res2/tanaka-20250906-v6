@@ -1,7 +1,6 @@
 """src/train.py – model creation and training utilities for FFT-DiT experiments
 All heavy-lifting (model definition, FSDP trainer, seed helpers) lives here so
-that the other modules can stay lightweight.  Nothing outside the six allowed
-files is imported other than publicly available PyPI packages.
+that the other modules can stay lightweight.
 """
 from __future__ import annotations
 
@@ -24,8 +23,8 @@ from tqdm import tqdm
 # -----------------------------------------------------------------------------
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
-# Updated directory according to the NEW mandatory instructions ---------------
-RESULT_DIR = ROOT / ".research" / "iteration7"  # <- was iteration6
+# Mandatory path change ───────────────────────────────────────────────────────
+RESULT_DIR = ROOT / ".research" / "iteration8"  # <- updated from iteration7
 RESULT_DIR.mkdir(parents=True, exist_ok=True)
 IMAGES_DIR = RESULT_DIR / "images"
 IMAGES_DIR.mkdir(exist_ok=True, parents=True)
@@ -232,6 +231,7 @@ class Trainer:  # pylint: disable=too-many-instance-attributes
 # -----------------------------------------------------------------------------
 #  Results helper (shared by all modules)
 # -----------------------------------------------------------------------------
+
 
 def save_json(obj: Any, path: pathlib.Path | str) -> None:  # noqa: D401
     path = pathlib.Path(path)
