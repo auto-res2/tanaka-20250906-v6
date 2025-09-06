@@ -1,0 +1,2 @@
+error: No `project` table found in: `/home/toma/actions-runner-3/_work/tanaka-20250906-v6/tanaka-20250906-v6/pyproject.toml`
+error: No `project` table found in: `/home/toma/actions-runner-3/_work/tanaka-20250906-v6/tanaka-20250906-v6/pyproject.toml`
