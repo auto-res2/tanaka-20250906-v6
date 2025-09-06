@@ -7,8 +7,9 @@ readme = "README.md"
 
 # Core runtime dependencies ---------------------------------------------------
 dependencies = [
+    "numpy>=1.23,<2.0",                 # pin <2 to avoid ABI issues with compiled deps
     "torch>=2.1,<2.2",                  # align with CUDA 12.x builds on the execution env
-    "torchvision>=0.16,<0.17",           # must match PyTorch 2.1 series
+    "torchvision>=0.16,<0.17",          # must match PyTorch 2.1 series
     "diffusers>=0.25,<0.36",
     # flash-fft-conv removed – it's optional and not on PyPI; code falls back gracefully
     "webdataset>=0.2,<0.3",
@@ -33,6 +34,7 @@ packages = [{ include = "src" }]
 
 [tool.poetry.dependencies]
 python = "^3.10"
+numpy = "^1.26"
 torch = "^2.1"
 torchvision = "^0.16"
 diffusers = "^0.25"

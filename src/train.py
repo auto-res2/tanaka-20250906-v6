@@ -24,7 +24,7 @@ from tqdm import tqdm
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 # Updated directory according to the NEW mandatory instructions ---------------
-RESULT_DIR = ROOT / ".research" / "iteration5"
+RESULT_DIR = ROOT / ".research" / "iteration6"  # <- iteration6 (was iteration5)
 RESULT_DIR.mkdir(parents=True, exist_ok=True)
 IMAGES_DIR = RESULT_DIR / "images"
 IMAGES_DIR.mkdir(exist_ok=True, parents=True)
@@ -42,14 +42,20 @@ def set_seeds(seed: int) -> None:
 # -----------------------------------------------------------------------------
 #  FFT-DiT  (minimal, self-contained)
 # -----------------------------------------------------------------------------
+# diffusers reorganised DiTModel location after 0.24 → support both import paths
 try:
-    from diffusers.models import DiTModel  # pylint: disable=import-error
-except ModuleNotFoundError as exc:  # pragma: no cover
-    raise ModuleNotFoundError("diffusers is required:  pip install diffusers") from exc
+    from diffusers.models import DiTModel  # diffusers ≥0.34 still exposes directly
+except (ImportError, AttributeError):  # fall-back to submodule path
+    try:
+        from diffusers.models.dit import DiTModel  # type: ignore
+    except (ImportError, AttributeError) as exc:  # pragma: no cover
+        raise ModuleNotFoundError(
+            "DiTModel not found in diffusers. Ensure `diffusers>=0.25,<0.36` is installed."
+        ) from exc
 
 # flash-fft-conv is strictly optional – fall back gracefully if missing
 try:
-    from flash_fft_conv import fft_conv  # noqa: F401  – import just to assert availability
+    from flash_fft_conv import fft_conv  # noqa: F401 – import just to assert availability
 except ModuleNotFoundError:  # optional speed-up only
     fft_conv = None  # type: ignore
 
