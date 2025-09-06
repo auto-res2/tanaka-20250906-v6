@@ -1,0 +1,10 @@
+Using CPython 3.11.13
+Creating virtual environment at: .venv
+  × No solution found when resolving dependencies:
+  ╰─▶ Because flash-fft-conv was not found in the package registry and your
+      project depends on flash-fft-conv, we can conclude that your project's
+      requirements are unsatisfiable.
+  × No solution found when resolving dependencies:
+  ╰─▶ Because flash-fft-conv was not found in the package registry and your
+      project depends on flash-fft-conv, we can conclude that your project's
+      requirements are unsatisfiable.
