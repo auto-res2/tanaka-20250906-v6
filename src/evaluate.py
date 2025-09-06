@@ -12,7 +12,7 @@ import seaborn as sns
 
 # ----------  paths & config  ------------------------------------------------
 ROOT = pathlib.Path(__file__).resolve().parent.parent
-RESEARCH_DIR = ROOT / ".research" / "iteration32"  # UPDATED (iteration31 ➜ iteration32)
+RESEARCH_DIR = ROOT / ".research" / "iteration33"  # unified to iteration33
 IMG_DIR = RESEARCH_DIR / "images"                    # ensured below
 for p in (RESEARCH_DIR, IMG_DIR):
     p.mkdir(parents=True, exist_ok=True)

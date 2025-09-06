@@ -1,5 +1,5 @@
 """src/train.py – model definitions, training loop, per-run execution
-(updated to iteration31 paths + resilient AMP import)"""
+(updated to iteration33 paths + resilient AMP import)"""
 import json, pathlib, random, shutil, subprocess, sys, time, os, contextlib
 from typing import Dict, Any, List
 
@@ -7,7 +7,7 @@ import torch, yaml, numpy as np
 from torch import nn
 # --------------------------  AMP helpers  ---------------------------------
 # GradScaler recently moved to torch.amp but remains in torch.cuda.amp for
-# older PyTorch releases.  We import from the new location first and   
+# older PyTorch releases.  We import from the new location first and
 # transparently fall-back to the classic path to maximise compatibility.
 try:
     from torch.amp import GradScaler            # PyTorch ≥2.1
@@ -18,11 +18,11 @@ from torch import autocast                       # torch.autocast("cuda", …)
 import torch.nn.functional as F
 
 # ---------------------------------------------------------------------------
-#  Repository paths (NOTE: iteration **31** as mandated)
+#  Repository paths (NOTE: iteration **33** as mandated)
 # ---------------------------------------------------------------------------
 ROOT = pathlib.Path(__file__).resolve().parent.parent      # repo root
 DATA_DIR = ROOT / "data"
-RESEARCH_DIR = ROOT / ".research" / "iteration31"
+RESEARCH_DIR = ROOT / ".research" / "iteration33"
 IMG_DIR = RESEARCH_DIR / "images"
 for p in (DATA_DIR, RESEARCH_DIR, IMG_DIR):
     p.mkdir(parents=True, exist_ok=True)
@@ -188,11 +188,11 @@ class DiffusionTrainer:
         )
         self.scheduler = DDPMScheduler(num_train_timesteps=1000)
 
-        # micro-batching to tame GPU memory -----------------------------------
+        # micro-batching to tame GPU memory ----------------------------------
         # If "micro_batch" not in YAML, fall back to 16 which is safe on T4 / 16 GB
         self.micro_batch = int(CFG.get("micro_batch", 16))
 
-        # decide if we profile -------------------------------------------------
+        # decide if we profile ------------------------------------------------
         self.profile_batches = CFG.get("profile_batches", 0)
         if self.profile_batches > 0:
             from torch.profiler import profile, ProfilerActivity, tensorboard_trace_handler
@@ -265,7 +265,7 @@ def _instantiate_model(model_key: str):
         cfg = {**CFG["models"]["fft_dit"], "img_size": CFG["dataset"]["img_size"]}
         return FFTDiT_S(cfg), cfg
     elif model_key == "dit":
-        cfg = CFG["models"]["dit"]
+        cfg = {**CFG["models"]["dit"], "img_size": CFG["dataset"]["img_size"]}
         return DiT_S(cfg), cfg
     else:
         raise NotImplementedError(model_key)
