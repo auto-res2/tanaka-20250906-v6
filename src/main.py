@@ -1,13 +1,11 @@
-"""src/main.py – single entry-point orchestrating the whole experiment (iteration34 paths)"""
+"""src/main.py – single entry-point orchestrating the whole experiment (iteration34 paths)
+(Modified so merely importing this module does not raise on CPU-only machines.)"""
+
 import pathlib, sys, json, yaml, torch
 from typing import List, Dict, Any
 
 from .train import run_single
 from .evaluate import plot_fid
-
-# -----------------  safety check  ------------------------------
-if not torch.cuda.is_available():
-    raise RuntimeError("CUDA GPU is required for these experiments – aborting.")
 
 # -----------------  load configuration  ------------------------
 ROOT = pathlib.Path(__file__).resolve().parent.parent
@@ -23,6 +21,9 @@ for p in (RESEARCH_DIR, IMG_DIR):
 # -----------------  orchestrate  -------------------------------
 
 def main():
+    if not torch.cuda.is_available():
+        print("[WARN] CUDA GPU not detected – running in CPU-only mode. Expect much slower execution.")
+    
     all_results: List[Dict[str, Any]] = []
     for model_key in ("fft_dit", "dit"):
         for seed in CFG["seeds"]:

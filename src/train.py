@@ -1,5 +1,6 @@
 """src/train.py – model definitions, training loop, per-run execution
-(updated to iteration34 paths + resilient DiT fallback with no-net clone)"""
+(adapted so the whole suite gracefully falls back to CPU-only environments.)"""
+
 import json, pathlib, random, shutil, subprocess, sys, time, os, contextlib
 from typing import Dict, Any, List
 
@@ -192,7 +193,6 @@ class FFTDiT_S(nn.Module):
         """x ∈ [-1,1]  (B,3,H,W) ;  t ∈ [0,1]  (B,)"""
         B = x.size(0)
         patch_H = self.img_size // 4
-        d = self.pos.size(-1)
 
         # Stem
         x = self.patch_embed(x)                      # (B,d,H/4,W/4)
@@ -200,7 +200,7 @@ class FFTDiT_S(nn.Module):
 
         # FiLM
         gamma = self.hyper(t)                        # (B,d)
-        c = torch.zeros(B, d, device=x.device, dtype=x.dtype)  # dummy class token context
+        c = torch.zeros(B, x.size(-1), device=x.device, dtype=x.dtype)  # dummy class token context
 
         for blk in self.blocks:
             x = blk(x, c)
@@ -245,11 +245,13 @@ from .preprocess import build_dataloaders, set_seed
 class DiffusionTrainer:
     """Encapsulates optimiser, AMP, DDPM scheduler and the training loop."""
     def __init__(self, model: nn.Module, cfg: dict, seed: int):
-        self.model = model.cuda()
+        # Detect device once – all tensors follow.
+        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        self.model = model.to(self.device)
         self.cfg = cfg
         self.seed = seed
 
-        self.scaler = GradScaler()
+        self.scaler = GradScaler(enabled=self.device.type == "cuda")
         self.optim = torch.optim.AdamW(
             model.parameters(),
             lr=cfg["lr"],
@@ -258,18 +260,17 @@ class DiffusionTrainer:
         )
         self.scheduler = DDPMScheduler(num_train_timesteps=1000)
 
-        # micro-batching to tame GPU memory ----------------------------------
-        # If "micro_batch" not in YAML, fall back to 16 which is safe on T4 / 16 GB
+        # micro-batching to tame GPU/CPU memory -----------------------------
         self.micro_batch = int(CFG.get("micro_batch", 16))
 
-        # decide if we profile ------------------------------------------------
-        self.profile_batches = CFG.get("profile_batches", 0)
+        # profiler ----------------------------------------------------------
+        self.profile_batches = CFG.get("profile_batches", 0) if self.device.type == "cuda" else 0
         if self.profile_batches > 0:
             from torch.profiler import profile, ProfilerActivity, tensorboard_trace_handler
             trace_dir = RES_DIR / f"trace_seed{seed}"
             trace_dir.mkdir(parents=True, exist_ok=True)
             self.prof = profile(
-                activities=[ProfilerActivity.CPU],  # CPU-only to avoid GPU OOM
+                activities=[ProfilerActivity.CPU],
                 record_shapes=False,
                 schedule=torch.profiler.schedule(wait=0, warmup=2, active=self.profile_batches, repeat=1),
                 on_trace_ready=tensorboard_trace_handler(str(trace_dir)),
@@ -284,38 +285,38 @@ class DiffusionTrainer:
         max_epochs = CFG.get("max_epochs", 50)
         early_stop_fid = CFG.get("early_stop_fid", 11.0)
 
-        amp_dtype = torch.bfloat16 if torch.cuda.is_bf16_supported() else torch.float16
+        amp_dtype = torch.bfloat16 if (self.device.type == "cuda" and torch.cuda.is_bf16_supported()) else torch.float16
 
         with self.prof:
             for epoch in range(max_epochs):
                 self.model.train()
                 for batch in train_loader:
-                    imgs_cpu = batch["x"]  # still on host (pinned) memory
+                    imgs_cpu = batch["x"]  # still on host memory
                     total_B = imgs_cpu.size(0)
                     self.optim.zero_grad(set_to_none=True)
                     accum_steps = (total_B + self.micro_batch - 1) // self.micro_batch
 
                     for i0 in range(0, total_B, self.micro_batch):
-                        imgs = imgs_cpu[i0:i0 + self.micro_batch].cuda(non_blocking=True)
+                        imgs = imgs_cpu[i0:i0 + self.micro_batch].to(self.device, non_blocking=True)
                         cur_B = imgs.size(0)
-                        t = torch.randint(0, 1000, (cur_B,), device=imgs.device)
+                        t = torch.randint(0, 1000, (cur_B,), device=self.device)
                         noise = torch.randn_like(imgs)
                         noisy = self.scheduler.add_noise(imgs, noise, t)
 
-                        with autocast("cuda", dtype=amp_dtype):
+                        with autocast(self.device.type, dtype=amp_dtype, enabled=self.device.type == "cuda"):
                             pred = self.model(noisy, t.float() / 1000.0)
                             loss = F.mse_loss(pred, noise) / accum_steps  # normalise by grad-accum steps
 
                         self.scaler.scale(loss).backward()
 
-                    # Optimiser step after full logical batch ----------------
+                    # Optimiser step after full logical batch ---------------
                     self.scaler.step(self.optim)
                     self.scaler.update()
                     self.prof.step()
 
                 # -------------  validation FID every 2 epochs -------------
                 if (epoch + 1) % 2 == 0:
-                    fid = evaluate_fid(self.model, val_loader, self.scheduler, CFG)
+                    fid = evaluate_fid(self.model, val_loader, self.scheduler, CFG, device=self.device)
                     print(f"[VAL] epoch={epoch + 1}   FID={fid:.2f}")
                     best_fid = min(best_fid, fid)
                     if fid <= early_stop_fid:
