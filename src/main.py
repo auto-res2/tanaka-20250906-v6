@@ -62,9 +62,9 @@ def main() -> None:  # noqa: D401
     run_id = cfg["run_id"] + "_" + datetime.utcnow().strftime("%Y%m%dT%H%M%SZ")
 
     # ------------------------------------------------------------------
-    # All outputs – JSON, traces, figs – must live under .research/iteration74/
+    # All outputs – JSON, traces, figs – must live under .research/iteration78/
     # ------------------------------------------------------------------
-    out_dir = ROOT_RESULTS_DIR  # fixed path as per instruction
+    out_dir = ROOT_RESULTS_DIR  # fixed path (iteration 78)
     out_dir.mkdir(parents=True, exist_ok=True)
 
     _log_environment(out_dir / "env.json")
