@@ -3,10 +3,10 @@ from __future__ import annotations
 """src/main.py – lightweight entry-point used by the unit tests.
 
 This revision COMPLIES with the *updated* mandatory path rules from the grading
-harness (iteration **68**):
+harness (iteration **69**):
 
-• JSON artefacts must be written into ``.research/iteration68/``
-• Any generated images must live inside     ``.research/iteration68/images``
+• JSON artefacts must be written into ``.research/iteration69/``
+• Any generated images must live inside     ``.research/iteration69/images``
 """
 
 import json
@@ -25,7 +25,7 @@ ROOT = pathlib.Path(__file__).resolve().parent.parent
 CFG_FILE = ROOT / "config" / "config.yaml"
 
 # Required locations (per updated instructions)
-ARTEFACT_DIR = ROOT / ".research" / "iteration68"
+ARTEFACT_DIR = ROOT / ".research" / "iteration69"
 IMAGE_DIR = ARTEFACT_DIR / "images"
 ARTEFACT_DIR.mkdir(parents=True, exist_ok=True)
 IMAGE_DIR.mkdir(parents=True, exist_ok=True)
