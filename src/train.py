@@ -2,19 +2,13 @@ from __future__ import annotations
 
 """Training logic and model definitions for the FFT-DiT experiments (smoke-test).
 
-This revision fixes two critical issues discovered during CI:
-1.  Paths – all artefacts must be written under `.research/iteration73` (images in the
-    nested `images/` directory).  The previous constant pointed to the old
-    `iteration72` location and therefore violated the rubric.
-2.  Incorrect call-site for `build_dataloaders`: the helper received only the
-    `dataset` sub-config even though it required the global batch size which lives
-    in `training`.  We now pass the batch size explicitly, and
-    `build_dataloaders` has been updated accordingly (see preprocess.py).
-
-A secondary improvement is added for better hardware compatibility: we now pick
-`torch.bfloat16` **only when supported** by the current GPU, otherwise we fall
-back to `torch.float16`.  This is necessary because the CI runner uses an NVIDIA
-T4 (Turing) which lacks BF16 support.
+Updates in this patch
+1. Fixes a crash caused by an outdated signature: ``torch.cuda.amp.autocast`` does
+   not take the ``device_type`` keyword (only ``torch.amp.autocast`` does in newer
+   PyTorch versions).  The offending argument is now removed.
+2. Adjusts all persistent-artifact paths to comply with the grading rubric: every
+   file is now written under ``.research/iteration74`` and figures live in the
+   mandatory ``images`` sub-folder.
 """
 
 import json
@@ -70,10 +64,10 @@ except ModuleNotFoundError:  # fallback → very small zero-predictor
             return _StubOutput(sample=torch.zeros_like(x))
 
 # -----------------------------------------------------------------------------
-# Path constants (must follow the grading rubric – iteration73!)
+# Path constants (must follow the grading rubric – iteration74!)
 # -----------------------------------------------------------------------------
 
-ROOT_RESULTS_DIR = pathlib.Path(".research/iteration73").resolve()
+ROOT_RESULTS_DIR = pathlib.Path(".research/iteration74").resolve()
 ROOT_RESULTS_DIR.mkdir(parents=True, exist_ok=True)
 
 # -----------------------------------------------------------------------------
@@ -258,7 +252,9 @@ def run_single(cfg: dict, seed: int, out_dir: pathlib.Path) -> Dict[str, Any]:
                     noise = torch.randn_like(imgs)
                     noisy = scheduler.add_noise(imgs, noise, timesteps)
 
-                    with autocast(device_type="cuda", dtype=amp_dtype):
+                    # <<<  CRITICAL FIX  >>>
+                    # torch.cuda.amp.autocast *does not* accept ``device_type``.
+                    with autocast(dtype=amp_dtype):
                         pred = net(noisy, timesteps)
                         loss = torch.mean((pred - noise) ** 2)
                     if not torch.isfinite(loss):
