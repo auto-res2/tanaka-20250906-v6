@@ -12,7 +12,7 @@ import seaborn as sns
 
 # ----------  paths & config  ------------------------------------------------
 ROOT = pathlib.Path(__file__).resolve().parent.parent
-RESEARCH_DIR = ROOT / ".research" / "iteration33"  # unified to iteration33
+RESEARCH_DIR = ROOT / ".research" / "iteration34"  # updated to iteration34
 IMG_DIR = RESEARCH_DIR / "images"                    # ensured below
 for p in (RESEARCH_DIR, IMG_DIR):
     p.mkdir(parents=True, exist_ok=True)
@@ -46,6 +46,8 @@ def evaluate_fid(model, val_loader, scheduler, cfg: Dict[str, Any]):
             imgs.append(z.detach().cpu())
 
     imgs = torch.cat(imgs)[:total_needed]
+    # torch-fidelity expects images in [0,1]; our samples are in [-1,1]
+    imgs = (imgs + 1) / 2.0
     metrics = calculate_metrics(
         input1=imgs,
         input2="cifar10-train",  # reference statistics shipped with torch-fidelity
