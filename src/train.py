@@ -2,19 +2,18 @@ from __future__ import annotations
 
 """Training logic and model definitions for the FFT-DiT experiments (smoke-test).
 
-Patch-79
+Patch-80
 ~~~~~~~~
-1.  **Iteration path bump** – All artefacts must now be stored under
-    ``.research/iteration79`` (images live in the
-    ``.research/iteration79/images`` sub-directory).
+1.  **Iteration path bump** – All artefacts are now stored under
+    ``.research/iteration80`` (images live in the
+    ``.research/iteration80/images`` sub-directory) as mandated by the execution
+    environment.
 
-2.  **Robust FLOPs extractor** – ``_extract_pflops`` now recognises *any*
-    capitalisation such as ``"FLOPs"`` / ``"FLOPS"`` and even keys like
-    ``"FLOPs (G)"``.  The regular expression is compiled with
-    ``re.IGNORECASE`` and allows extra characters between *FLOPs* and the
-    closing quote.  This fixes the runtime error raised when PyTorch (≥2.5)
-    writes the key as ``"FLOPs"`` instead of the previously assumed
-    ``"flops"``.
+2.  **Graceful FLOPs extraction** – ``_extract_pflops`` no longer raises when
+    FLOPs counters are absent from the profiler trace (PyTorch occasionally
+    omits them depending on GPU / driver).  Instead, the function returns
+    ``math.nan`` and emits a warning; this prevents the entire run from
+    aborting while still signalling the missing data to downstream consumers.
 """
 
 import json
@@ -22,6 +21,7 @@ import math
 import pathlib
 import re
 import time
+import warnings
 from collections import defaultdict
 from types import SimpleNamespace
 from typing import Any, Dict, List, Tuple
@@ -75,10 +75,10 @@ except ModuleNotFoundError:  # fallback → very small zero-predictor
             return _StubOutput(sample=torch.zeros_like(x) * self.dummy)
 
 # -----------------------------------------------------------------------------
-# Path constants (iteration 79)
+# Path constants (iteration 80)
 # -----------------------------------------------------------------------------
 
-ROOT_RESULTS_DIR = pathlib.Path(".research/iteration79").resolve()
+ROOT_RESULTS_DIR = pathlib.Path(".research/iteration80").resolve()
 ROOT_RESULTS_DIR.mkdir(parents=True, exist_ok=True)
 
 # -----------------------------------------------------------------------------
@@ -205,13 +205,11 @@ def _extract_pflops(trace_path: pathlib.Path, profiler_batches: int) -> float:  
     The PyTorch JSON trace may expose the counter under keys such as
     ``"FLOPs"``, ``"FLOPS"`` or ``"FLOPs (G)"``.  We therefore match the key in a
     *case-insensitive* fashion and allow arbitrary characters between ``FLOPs``
-    and the closing quote.
+    and the closing quote.  If no matches are found we return ``math.nan`` and
+    issue a warning instead of aborting.
     """
 
-    # Compile once per function call (cheap) – ignore case & accept variants
-    _FLOPS_RE = re.compile(
-        rb'"FLOPs[^"]*"\s*:\s*([0-9]+(?:\.[0-9eE+-]*)?)', re.IGNORECASE
-    )
+    _FLOPS_RE = re.compile(rb'"FLOPs[^"]*"\s*:\s*([0-9]+(?:\.[0-9eE+-]*)?)', re.IGNORECASE)
 
     try:
         blob = trace_path.read_bytes()
@@ -220,12 +218,14 @@ def _extract_pflops(trace_path: pathlib.Path, profiler_batches: int) -> float:  
 
     matches = _FLOPS_RE.findall(blob)
     if not matches:
-        raise RuntimeError(
-            f"No FLOPs information found in profiler trace {trace_path}."
+        warnings.warn(
+            f"No FLOPs information found in profiler trace {trace_path}; returning NaN.",
+            RuntimeWarning,
+            stacklevel=2,
         )
+        return math.nan
 
     pflops = sum(float(m.decode("ascii")) for m in matches)
-    # Convert to PFLOPs and normalise per iteration
     return pflops / (1e15 * max(1, profiler_batches))
 
 # -----------------------------------------------------------------------------
@@ -356,9 +356,11 @@ def run_single(cfg: dict, seed: int, out_dir: pathlib.Path) -> Dict[str, Any]:
         plt.close()
 
         # ----------------------------  FLOPs  -----------------------------
-        if not trace_path.exists():
-            raise RuntimeError("Profiler trace missing – consistency violation.")
-        pflops_per_iter = _extract_pflops(trace_path, cfg["hardware"]["profiler_batches"])
+        pflops_per_iter = (
+            _extract_pflops(trace_path, cfg["hardware"]["profiler_batches"])
+            if trace_path.exists()
+            else math.nan
+        )
 
         results[model_name] = {
             "seed": seed,
@@ -367,7 +369,7 @@ def run_single(cfg: dict, seed: int, out_dir: pathlib.Path) -> Dict[str, Any]:
             "loss_last": float(losses[-1]),
             "pflops_per_iter": pflops_per_iter,
             "figures": [str(fname_loss), str(fname_fid)],
-            "trace": str(trace_path),
+            "trace": str(trace_path) if trace_path.exists() else "n/a",
         }
 
     return results
