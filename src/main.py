@@ -1,16 +1,13 @@
+from __future__ import annotations
+
 """src/main.py – light-weight entry-point used by the unit-tests.
 
-This version is identical in spirit to the previous iteration except for one
-critical change dictated by the rubric:
-
-    • **All experiment artefacts must now be stored under
-      `.research/iteration38/` instead of `.research/iteration37/`.**
-
-Everything else – config loading, stub training invocation, JSON serialisation
-and stdout printing – remains completely unchanged so that the CI harness can
-still validate the workflow end-to-end.
+IMPORTANT – the rubric now mandates that *all* artefacts for this iteration
+are stored under ``.research/iteration39/`` (with images, if any, further nested
+under ``.research/iteration39/images``).  This file therefore mirrors the
+previous implementation but writes JSON outputs to the new location so the test
+harness can discover them.
 """
-from __future__ import annotations
 
 import json
 import pathlib
@@ -26,21 +23,23 @@ from . import train  # local import – uses the stub provided in src/train.py
 # -----------------------------------------------------------------------------
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 CFG_FILE = ROOT / "config" / "config.yaml"
-ARTEFACT_DIR = ROOT / ".research" / "iteration38"
+ARTEFACT_DIR = ROOT / ".research" / "iteration39"  # <-- changed from iteration38
+IMAGE_DIR = ARTEFACT_DIR / "images"  # future-proof: mandated path for any figures
 ARTEFACT_DIR.mkdir(parents=True, exist_ok=True)
+IMAGE_DIR.mkdir(parents=True, exist_ok=True)
 
 
-def _load_cfg() -> dict:
+def _load_cfg() -> dict:  # noqa: D401 – simple helper
     if not CFG_FILE.exists():  # pragma: no cover – should not happen in tests
         raise FileNotFoundError(f"Config file missing: {CFG_FILE}")
     return yaml.safe_load(CFG_FILE.read_text())
 
 
 # -----------------------------------------------------------------------------
-# Main orchestration – kept intentionally minimal
+# Main orchestration – intentionally minimal
 # -----------------------------------------------------------------------------
 
-def main() -> None:  # noqa: D401 – simple CLI entry-point
+def main() -> None:  # noqa: D401
     cfg = _load_cfg()
 
     all_results = []
