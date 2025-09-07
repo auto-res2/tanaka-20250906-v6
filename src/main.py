@@ -34,7 +34,7 @@ from .preprocess import DataDownloadError, build_dataloaders
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 
 # Mandatory path for all artefacts ------------------------------------------------
-OUT_ROOT = ROOT / ".research" / "iteration82"  # fixed path per spec
+OUT_ROOT = ROOT / ".research" / "iteration83"  # updated to iteration83 per spec
 IMAGES_DIR = OUT_ROOT / "images"
 IMAGES_DIR.mkdir(parents=True, exist_ok=True)
 
@@ -146,6 +146,7 @@ def run_experiment(exp_name: str, exp_cfg: Dict, output_dir: pathlib.Path) -> Di
 # -----------------------------------------------------------------------------
 #  MAIN – iterate over all experiments defined in the YAML suite  --------------
 # -----------------------------------------------------------------------------
+
 
 def main():  # noqa: D401
     all_results = {}

@@ -31,10 +31,11 @@ AMP_DTYPE = torch.bfloat16 if BF16_OK else torch.float16
 
 def set_seed(seed: int) -> None:
     """Set *all* RNG seeds for full reproducibility."""
-    import numpy as np  # local import to keep global namespace clean
+    # local import to keep global namespace clean
+    import numpy as _np  # noqa: N812  -- alias avoids shadowing the global np
 
     random.seed(seed)
-    np.random.seed(seed)
+    _np.random.seed(seed)
     torch.manual_seed(seed)
     if torch.cuda.is_available():
         torch.cuda.manual_seed_all(seed)
@@ -43,7 +44,15 @@ def set_seed(seed: int) -> None:
 # -----------------------------------------------------------------------------
 #  MODEL DEFINITIONS  (DiT & FFT-DiT)
 # -----------------------------------------------------------------------------
-from diffusers.models.dit import DiTConfig, DiTModel  # pylint: disable=wrong-import-order
+# NOTE:  The internal package layout of *diffusers* changed a few times. Newer
+#        versions expose DiT both via ``diffusers.models.dit`` *and* directly
+#        from ``diffusers.models``.  To stay compatible with every minor version
+#        in the allowed range (<0.36) we try the more specific import first and
+#        gracefully fall back to the generic one.
+try:
+    from diffusers.models.dit import DiTConfig, DiTModel  # pylint: disable=wrong-import-order
+except ModuleNotFoundError:  # pragma: no cover – executed only on older wheels
+    from diffusers.models import DiTConfig, DiTModel  # type: ignore  # noqa: F401,E501
 
 
 class BaseDiT(nn.Module):
@@ -69,13 +78,16 @@ class FFTDiT(BaseDiT):
     """Frequency- and time-adaptive DiT variant from the paper."""
 
     def __init__(self, cfg: Dict, adapter_rank: int):
-        super().__init__(cfg)
-        ic = cfg["in_channels"]
+        # ``adapter_rank`` is **not** a valid argument for DiTConfig.  Strip it
+        # before passing the dict further down to the official implementation.
+        cfg_core = {k: v for k, v in cfg.items() if k != "adapter_rank"}
+        super().__init__(cfg_core)
+        ic = cfg_core["in_channels"]
         self.adapter = _spectral_adapter(ic, ic, adapter_rank)
         self.hyper = nn.Sequential(
-            nn.Linear(1, cfg["hidden_size"]),
+            nn.Linear(1, cfg_core["hidden_size"]),
             nn.SiLU(),
-            nn.Linear(cfg["hidden_size"], ic),
+            nn.Linear(cfg_core["hidden_size"], ic),
             nn.Sigmoid(),
         )
 
@@ -89,11 +101,13 @@ class FFTDiT(BaseDiT):
 
 def make_model(model_cfg: Dict) -> nn.Module:
     typ = model_cfg["type"].lower()
-    params = model_cfg["params"]
+    params = model_cfg["params"].copy()  # shallow copy so we can mutate safely
     if typ == "dit":
+        params.pop("adapter_rank", None)  # ignore if present accidentally
         return BaseDiT(params)
     if typ == "fft_dit":
-        return FFTDiT(params, adapter_rank=params["adapter_rank"])
+        adapter_rank = params.pop("adapter_rank")
+        return FFTDiT(params, adapter_rank=adapter_rank)
     raise ValueError(f"Unknown model type: {typ}")
 
 
@@ -227,7 +241,7 @@ def train_one_epoch(
         ),
         on_trace_ready=lambda p: p.export_chrome_trace("trace.json"),
     ) as prof:
-        for step, batch in enumerate(dataloader):  # noqa: B007  (step unused)
+        for _, batch in enumerate(dataloader):  # noqa: B007  (step unused)
             imgs = batch["x"].to(device, non_blocking=True)
             bsz = imgs.size(0)
             timesteps = torch.randint(0, 1000, (bsz,), device=device)
