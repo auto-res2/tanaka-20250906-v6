@@ -1,25 +1,26 @@
-[tool.poetry]
+[project]
 name = "fft_dit_experiments"
 version = "0.1.0"
 description = "Research code for FFT-DiT diffusion experiments"
-authors = ["Researcher <research@example.com>"]
 readme = "README.md"
-packages = [
-    { include = "src" }
+requires-python = ">=3.9,<3.12"
+authors = [
+  { name = "Researcher", email = "research@example.com" }
 ]
 
-[tool.poetry.dependencies]
-python = ">=3.9,<3.12"
-torch = "^2.0"
-torchvision = "^0.15"
-diffusers = "^0.24"
-datasets = "^2.18"
-torch-fidelity = "^0.3"
-numpy = "^1.25"
-pyyaml = "^6.0"
-matplotlib = "^3.8"
-seaborn = "^0.13"
+# Dependencies required for the project (PEP-621 compliant so that **uv** can parse it)
+dependencies = [
+  "torch>=2.0,<3.0",
+  "torchvision>=0.15,<1.0",
+  "diffusers>=0.26,<0.36",
+  "datasets>=2.18,<4.1",
+  "torch-fidelity>=0.3,<0.6",
+  "numpy>=1.25,<3.0",
+  "pyyaml>=6.0,<7.0",
+  "matplotlib>=3.8,<4.0",
+  "seaborn>=0.13,<1.0"
+]
 
 [build-system]
-requires = ["poetry-core>=1.5"]
-build-backend = "poetry.core.masonry.api"
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"

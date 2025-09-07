@@ -1,16 +1,19 @@
+from __future__ import annotations
+
 """src/main.py – project entry-point
 Run via  →  python -m src.main
 This script orchestrates the full experimental workflow using the helper
 functions that live in *train.py*, *evaluate.py* and *preprocess.py*.
 """
-from __future__ import annotations
 
 import json
+import math  # Added: required for math.isnan
 import pathlib
 import time
 from datetime import datetime
 from typing import Dict
 
+import numpy as np  # Added: used for final aggregation
 import torch
 import yaml
 from diffusers import DDPMScheduler
@@ -29,10 +32,13 @@ from .preprocess import DataDownloadError, build_dataloaders
 #  DIRECTORIES & CONFIG --------------------------------------------------------
 # -----------------------------------------------------------------------------
 ROOT = pathlib.Path(__file__).resolve().parent.parent
-CFG_PATH = ROOT / "config" / "config.yaml"
-OUT_ROOT = ROOT / ".research" / datetime.utcnow().strftime("%Y%m%dT%H%M%SZ")
-OUT_ROOT.mkdir(parents=True, exist_ok=True)
 
+# Mandatory path for all artefacts ------------------------------------------------
+OUT_ROOT = ROOT / ".research" / "iteration82"  # fixed path per spec
+IMAGES_DIR = OUT_ROOT / "images"
+IMAGES_DIR.mkdir(parents=True, exist_ok=True)
+
+CFG_PATH = ROOT / "config" / "config.yaml"
 with CFG_PATH.open() as f:
     SUITE_CFG = yaml.safe_load(f)
 
@@ -100,7 +106,9 @@ def run_experiment(exp_name: str, exp_cfg: Dict, output_dir: pathlib.Path) -> Di
             fid_history.append(float(fid))
 
             if epoch == 0 and fid >= exp_cfg["asserts"]["fid_epoch1_lt"]:
-                raise RuntimeError("FID too high after first epoch; pipeline likely broken.")
+                raise RuntimeError(
+                    "FID too high after first epoch; pipeline likely broken."
+                )
 
             print(
                 f"Epoch {epoch}  |  loss {avg_loss:.4f}  |  FID {fid:.2f}  |  IS {iscore:.2f}"
@@ -109,11 +117,13 @@ def run_experiment(exp_name: str, exp_cfg: Dict, output_dir: pathlib.Path) -> Di
         powerlog.stop()
 
         # ================= PFLOPs  &  PLOT ====================================
-        pflops = extract_pflops(pathlib.Path("trace.json"), exp_cfg["hardware"]["profiler_batches"])
-        if math.isnan(pflops):  # noqa: F821  (math imported implicitly via train.extract_pflops)
+        pflops = extract_pflops(
+            pathlib.Path("trace.json"), exp_cfg["hardware"]["profiler_batches"]
+        )
+        if math.isnan(pflops):
             raise RuntimeError("PFLOPs extraction failed – got NaN.")
 
-        fig_path = output_dir / f"fid_curve_seed{seed}.pdf"
+        fig_path = IMAGES_DIR / f"{exp_name}_fid_curve_seed{seed}.pdf"
         plot_fid_curve(fid_history, fig_path)
 
         results_all_seeds[seed] = {
@@ -126,7 +136,7 @@ def run_experiment(exp_name: str, exp_cfg: Dict, output_dir: pathlib.Path) -> Di
     # -------------- aggregate ------------------------------------------------
     fids = [v["final_fid"] for v in results_all_seeds.values()]
     agg = {
-        "fid_mean": float(np.mean(fids)),  # noqa: F405  (np imported via train)
+        "fid_mean": float(np.mean(fids)),
         "fid_std": float(np.std(fids)),
         "seeds": results_all_seeds,
     }
