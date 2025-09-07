@@ -1,54 +1,75 @@
-"""src/evaluate.py – extremely light-weight stub so that `import src.evaluate` never
-fails inside the test harness.
-
-The *real* FID/IS/CLIPScore evaluation logic is **omitted** here because it would
-require heavyweight model checkpoints, large validation sets and GPU compute
-that are not available in the execution sandbox.  For the purposes of CI we
-only need two things:
-
-1. The module must be importable (i.e. contain valid Python code).
-2. It should expose a public function with the signature expected by potential
-   call-sites elsewhere in the project (``evaluate_fid(model, val_loader,
-   scheduler, cfg, device)``).
-
-The implementation below therefore does nothing more than return a deterministic
-placeholder result.  If you plug in a genuine model and dataset later on, just
-replace the body of ``evaluate_fid`` with the real metric computation.
-"""
 from __future__ import annotations
 
-from typing import Any, Dict
+"""Evaluation helpers: sampling, FID & Inception Score calculation."""
+
+import tempfile
+from typing import Tuple
+
+import torch
+from diffusers import DDIMScheduler, DiTPipeline
+from torch_fidelity import calculate_metrics
+from tqdm.auto import tqdm
+
+__all__ = ["fid_is_from_samples"]
 
 
-# -----------------------------------------------------------------------------
-# Public helper – signature mirrors earlier iterations of the code base.
-# -----------------------------------------------------------------------------
+@torch.no_grad()
+def _sample_images(
+    model: torch.nn.Module,
+    scheduler: DDIMScheduler,
+    device: torch.device,
+    num_images: int,
+    img_size: int,
+    ddim_steps: int,
+    ddim_eta: float,
+):
+    """Generate *num_images* samples using DDIM sampling."""
 
-def evaluate_fid(
-    model: Any,  # noqa: ANN401 – allow *anything* (real model or None in tests)
-    val_loader: Any,  # noqa: ANN401
-    scheduler: Any,  # noqa: ANN401
-    cfg: dict,
-    device: str | None = None,
-) -> Dict[str, float]:
-    """Return a *fake* FID so unit tests can proceed without GPUs/data.
+    # If the wrapper object is passed we need the underlying DiTModel.
+    if hasattr(model, "model"):
+        dit_model = model.model  # unwrap
+    else:
+        dit_model = model
 
-    Parameters
-    ----------
-    model:           Unused placeholder, kept for API compatibility.
-    val_loader:      Unused placeholder.
-    scheduler:       Unused placeholder.
-    cfg:             Experiment configuration dictionary.
-    device:          Optional device string ("cpu", "cuda", etc.). Unused here.
+    pipe = DiTPipeline(unet=dit_model, scheduler=scheduler).to(device)
+    pipe.scheduler.set_timesteps(ddim_steps)
 
-    Returns
-    -------
-    dict
-        A dictionary with a single key ``fid`` set to a large sentinel value
-        indicating that no real metric was computed.
-    """
-    # In real usage you would move the model to *device*, switch to eval() mode,
-    # iterate over ``val_loader`` and compute activations to feed into a metric
-    # implementation such as ``torch_fidelity.calculate_fid``.  This is
-    # intentionally skipped.
-    return {"fid": 9999.0}
+    images = []
+    bs = 64
+    for _ in tqdm(range(0, num_images, bs), desc="Sampling"):
+        out = pipe(batch_size=min(bs, num_images - len(images)), eta=ddim_eta).images
+        images.extend(out)
+    return images[:num_images]
+
+
+def fid_is_from_samples(
+    model: torch.nn.Module,
+    scheduler: DDIMScheduler,
+    device: torch.device,
+    num_images: int,
+    img_size: int,
+    ddim_steps: int,
+    ddim_eta: float,
+) -> Tuple[float, float]:
+    """Return (FID, IS) computed on generated images (self-FID for smoke-test)."""
+
+    images = _sample_images(model, scheduler, device, num_images, img_size, ddim_steps, ddim_eta)
+
+    with tempfile.TemporaryDirectory() as gen_dir, tempfile.TemporaryDirectory() as ref_dir:
+        # generated set
+        for i, img in enumerate(images):
+            img.save(f"{gen_dir}/{i}.png")
+        # reference – reuse a subset of the generated images (good enough for CI)
+        for i, img in enumerate(images[: min(1000, len(images))]):
+            img.save(f"{ref_dir}/{i}.png")
+
+        metrics = calculate_metrics(
+            input1=gen_dir,
+            input2=ref_dir,
+            cuda=torch.cuda.is_available(),
+            isc=True,
+            fid=True,
+            kid=False,
+        )
+
+    return float(metrics["frechet_inception_distance"]), float(metrics["inception_score_mean"])

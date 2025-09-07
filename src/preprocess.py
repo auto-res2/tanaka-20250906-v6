@@ -1,76 +1,110 @@
-import pathlib, random, yaml
+from __future__ import annotations
+
+"""Data-loading & pre-processing helpers (mini-ImageNet from HuggingFace)."""
+
+import pathlib
 from typing import Tuple
 
-import torch, torchvision
+import datasets as hfd
+import torch
+import torchvision.transforms as T
 from torch.utils.data import DataLoader, Dataset
-from datasets import load_dataset
 
-# -----------------  paths / config  ----------------------------
+__all__ = ["build_dataloaders", "DataDownloadError"]
+
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 DATA_DIR = ROOT / "data"
-CFG_FILE = ROOT / "config" / "config.yaml"
-CFG = yaml.safe_load(CFG_FILE.read_text())
 DATA_DIR.mkdir(parents=True, exist_ok=True)
 
-# -----------------  helpers  ----------------------------------
+# -----------------------------------------------------------------------------
+# Utilities (local to this file to satisfy the 6-file constraint)
+# -----------------------------------------------------------------------------
+
+
+def _sha256_of_file(path: pathlib.Path, chunk_size: int = 1_048_576) -> str:
+    import hashlib
+
+    h = hashlib.sha256()
+    with path.open("rb") as fp:
+        for chunk in iter(lambda: fp.read(chunk_size), b""):
+            h.update(chunk)
+    return h.hexdigest()
+
+
+def _verify_sha256(path: pathlib.Path, expected: str) -> None:
+    actual = _sha256_of_file(path)
+    if actual != expected:
+        raise RuntimeError(f"SHA-256 mismatch for {path}: expected {expected}, got {actual}")
+
+
+# -----------------------------------------------------------------------------
+# Errors
+# -----------------------------------------------------------------------------
+
+
 class DataDownloadError(RuntimeError):
-    """Raised when required HuggingFace dataset shards are unavailable."""
-    pass
+    """Raised when HuggingFace dataset download / verification fails."""
 
-_transform = torchvision.transforms.Compose([
-    torchvision.transforms.Resize(CFG["dataset"]["img_size"] + 16, antialias=True),
-    torchvision.transforms.CenterCrop(CFG["dataset"]["img_size"]),
-    torchvision.transforms.ToTensor(),
-    # map [0,1] → [-1,1]
-    torchvision.transforms.Normalize([0.5, 0.5, 0.5], [0.5, 0.5, 0.5]),
-])
 
-# -----------------  custom dataset wrapper  --------------------
-class HFDataset(Dataset):
-    """Thin wrapper converting a HF dataset row → tensor dict usable by PyTorch."""
-    def __init__(self, hf_ds):
-        self.hf_ds = hf_ds
-        # figure out the image column name dynamically
-        if "img" in hf_ds.column_names:
-            self.img_key = "img"
-        elif "image" in hf_ds.column_names:
-            self.img_key = "image"
-        else:
-            raise KeyError("Supported image column not found in dataset (expected 'img' or 'image').")
+# -----------------------------------------------------------------------------
+# Internal dataset wrapper
+# -----------------------------------------------------------------------------
+
+
+class _HFDataset(Dataset):
+    def __init__(self, split, img_size: int):
+        self.split = split
+        self.transform = T.Compose(
+            [
+                T.Resize(img_size + 16, antialias=True),
+                T.CenterCrop(img_size),
+                T.ToTensor(),
+                T.Normalize([0.5] * 3, [0.5] * 3),
+            ]
+        )
 
     def __len__(self):
-        return len(self.hf_ds)
+        return len(self.split)
 
     def __getitem__(self, idx):
-        example = self.hf_ds[int(idx)]
-        img = _transform(example[self.img_key].convert("RGB"))
-        label = int(example["label"])
-        return {"x": img, "y": torch.tensor(label, dtype=torch.long)}
+        record = self.split[int(idx)]
+        img = record.get("img", record.get("image")).convert("RGB")
+        return {"x": self.transform(img)}
 
-# -----------------  public API  --------------------------------
 
-def build_dataloaders(*, batch: int, seed: int, cfg: dict):
-    """Download (if necessary) the mini-ImageNet set from HuggingFace and build train/val loaders."""
+# -----------------------------------------------------------------------------
+# Public helper
+# -----------------------------------------------------------------------------
+
+
+def build_dataloaders(cfg: dict, seed: int) -> Tuple[DataLoader, DataLoader]:
+    """Download (if needed) and build deterministic train/val dataloaders."""
+
     try:
-        ds = load_dataset(cfg["dataset"]["hf_repo"], split="train", cache_dir=str(DATA_DIR))
-    except Exception as e:
-        raise DataDownloadError(f"Dataset unavailable – aborting. Details: {e}")
+        ds = hfd.load_dataset(cfg["hf_repo"], cache_dir=str(DATA_DIR))
+    except Exception as e:  # pragma: no cover – network issues
+        raise DataDownloadError(f"Could not download dataset: {e}") from e
 
-    ds = ds.train_test_split(test_size=cfg["dataset"]["val_split"], seed=seed)
-    train_ds, val_ds = ds["train"], ds["test"]
+    # Optional SHA-256 verification (offline integrity check)
+    sha_file = cfg.get("sha256_file")
+    if sha_file and pathlib.Path(sha_file).exists():
+        for line in pathlib.Path(sha_file).read_text().splitlines():
+            expected, rel = line.strip().split()[:2]
+            _verify_sha256(DATA_DIR / rel, expected)
 
-    train_loader = DataLoader(HFDataset(train_ds), batch_size=batch, shuffle=True, num_workers=8, drop_last=True, pin_memory=True)
-    val_loader = DataLoader(HFDataset(val_ds), batch_size=batch, shuffle=False, num_workers=4, pin_memory=True)
+    split = ds["train"].train_test_split(test_size=cfg["val_split"], seed=seed)
+    train_ds = _HFDataset(split["train"], img_size=cfg["img_size"])
+    val_ds = _HFDataset(split["test"], img_size=cfg["img_size"])
+
+    train_loader = DataLoader(
+        train_ds,
+        batch_size=cfg["global_batch"],
+        shuffle=True,
+        num_workers=8,
+        pin_memory=True,
+        drop_last=True,
+    )
+    val_loader = DataLoader(
+        val_ds, batch_size=cfg["global_batch"], shuffle=False, num_workers=4, pin_memory=True
+    )
     return train_loader, val_loader
-
-# -----------------  reproducibility  ---------------------------
-
-def set_seed(seed: int):
-    random.seed(seed)
-    import numpy as np
-    np.random.seed(seed)
-    torch.manual_seed(seed)
-    # Only call CUDA seeding helpers if a CUDA device is actually present to avoid
-    # runtime errors in CPU-only environments.
-    if torch.cuda.is_available():
-        torch.cuda.manual_seed_all(seed)

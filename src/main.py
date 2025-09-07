@@ -1,70 +1,98 @@
 from __future__ import annotations
 
-"""src/main.py – lightweight entry-point used by the unit tests.
-
-This revision COMPLIES with the *updated* mandatory path rules from the grading
-harness (iteration **69**):
-
-• JSON artefacts must be written into ``.research/iteration69/``
-• Any generated images must live inside     ``.research/iteration69/images``
-"""
+"""Entry-point.  Orchestrates the complete experiment suite for all seeds."""
 
 import json
 import pathlib
 import time
 from datetime import datetime
+from typing import Dict
 
 import yaml
 
-from . import train  # local import – uses the stub provided in src/train.py
+from .train import run_single
 
 # -----------------------------------------------------------------------------
-# Configuration & global paths
+# Environment logging (kept here to avoid an extra file)
 # -----------------------------------------------------------------------------
+
+def _log_environment(out_path: pathlib.Path) -> None:
+    """Write minimal reproducibility snapshot (git hash, torch/cuDNN versions…)."""
+
+    import subprocess
+    import sys
+
+    info: Dict[str, str] = {}
+    try:
+        git_hash = (
+            subprocess.check_output(["git", "rev-parse", "HEAD"], text=True).strip()
+            if (pathlib.Path.cwd() / ".git").exists()
+            else "n/a"
+        )
+    except Exception:  # pragma: no cover – git not available
+        git_hash = "n/a"
+
+    info["git_commit"] = git_hash
+    info["python"] = sys.version
+    info["datetime_utc"] = datetime.utcnow().isoformat() + "Z"
+    out_path.write_text(json.dumps(info, indent=2))
+
+
+# -----------------------------------------------------------------------------
+# Config helper
+# -----------------------------------------------------------------------------
+
 ROOT = pathlib.Path(__file__).resolve().parent.parent
-CFG_FILE = ROOT / "config" / "config.yaml"
-
-# Required locations (per updated instructions)
-ARTEFACT_DIR = ROOT / ".research" / "iteration69"
-IMAGE_DIR = ARTEFACT_DIR / "images"
-ARTEFACT_DIR.mkdir(parents=True, exist_ok=True)
-IMAGE_DIR.mkdir(parents=True, exist_ok=True)
 
 
-def _load_cfg() -> dict:  # noqa: D401 – simple helper
-    if not CFG_FILE.exists():  # pragma: no cover – should not happen in tests
-        raise FileNotFoundError(f"Config file missing: {CFG_FILE}")
-    return yaml.safe_load(CFG_FILE.read_text())
+def _load_cfg() -> dict:
+    cfg_path = ROOT / "config" / "config.yaml"
+    return yaml.safe_load(cfg_path.read_text())
 
 
 # -----------------------------------------------------------------------------
-# Main orchestration – intentionally minimal
+# Main
 # -----------------------------------------------------------------------------
+
 
 def main() -> None:  # noqa: D401
     cfg = _load_cfg()
 
-    all_results = []
-    start_wall = time.time()
+    run_id = cfg["run_id"] + "_" + datetime.utcnow().strftime("%Y%m%dT%H%M%SZ")
+    out_dir = pathlib.Path(cfg["output_root"]) / run_id
+    out_dir.mkdir(parents=True, exist_ok=True)
 
-    for seed in cfg.get("seeds", []):
-        # Run (stub) training – returns dict
-        run_info = train.run_single(cfg, seed=seed)
-        all_results.append(run_info)
+    _log_environment(out_dir / "env.json")
+
+    start = time.perf_counter()
+    all_results: Dict[str, dict] = {}
+
+    for seed in cfg["seed_list"]:
+        res = run_single(cfg, seed, out_dir)
+        all_results[str(seed)] = res
 
         # ------------------------------------------------------------------
-        # Persist artefact: one JSON per seed, mandatory directory enforced
+        # Persist per-seed JSON & echo to stdout for CI verification
         # ------------------------------------------------------------------
-        ts = datetime.utcnow().strftime("%Y%m%dT%H%M%SZ")
-        out_path = ARTEFACT_DIR / f"seed_{seed}_{ts}.json"
-        out_path.write_text(json.dumps(run_info, indent=2))
+        result_path = out_dir / f"seed_{seed}.json"
+        result_path.write_text(json.dumps(res, indent=2))
 
-        # ALSO print to stdout for verification (as per instructions)
-        print(out_path.read_text())
+        print("\n===================== Experiment description =====================")
+        print(f"Run-ID: {run_id}    Seed: {seed}")
+        print("Dataset:", cfg["dataset"]["name"], "| Model variants:", ", ".join(res.keys()))
+        print("===================== Numerical results ========================")
+        print(json.dumps(res, indent=2))
+        print("===================== Figures ==================================")
+        for m in res.values():
+            for fig in m["figures"]:
+                print("Figure saved:", fig)
 
-    print("Finished in", round(time.time() - start_wall, 2), "sec")
+    # Aggregate results (all seeds)
+    (out_dir / "aggregate.json").write_text(json.dumps(all_results, indent=2))
+    elapsed = round(time.perf_counter() - start, 2)
+    print("================================================================")
+    print("All experiments finished in", elapsed, "sec")
 
 
-# Allow execution via `python -m src.main`
 if __name__ == "__main__":  # pragma: no cover
     main()
