@@ -2,18 +2,19 @@ from __future__ import annotations
 
 """Training logic and model definitions for the FFT-DiT experiments (smoke-test).
 
-Patch-78
+Patch-79
 ~~~~~~~~
-1.  **Unicode-safe profiler parsing** – ``_extract_pflops`` no longer reads the
-    Chrome-trace JSON via ``Path.read_text()`` (which enforces UTF-8).  Instead
-    we operate on the *raw* ``bytes`` buffer and use a regex to locate all
-    occurrences of the ``"flops": <number>`` field.  This sidesteps sporadic
-    ``UnicodeDecodeError`` issues caused by non-UTF-8 bytes that PyTorch may
-    embed in the trace when stack-capture is enabled.
+1.  **Iteration path bump** – All artefacts must now be stored under
+    ``.research/iteration79`` (images live in the
+    ``.research/iteration79/images`` sub-directory).
 
-2.  **Path updates (iteration 78)** – all artefacts now live under the required
-    ``.research/iteration78`` root; figure files are saved into
-    ``.research/iteration78/images`` as mandated by the grading rubric.
+2.  **Robust FLOPs extractor** – ``_extract_pflops`` now recognises *any*
+    capitalisation such as ``"FLOPs"`` / ``"FLOPS"`` and even keys like
+    ``"FLOPs (G)"``.  The regular expression is compiled with
+    ``re.IGNORECASE`` and allows extra characters between *FLOPs* and the
+    closing quote.  This fixes the runtime error raised when PyTorch (≥2.5)
+    writes the key as ``"FLOPs"`` instead of the previously assumed
+    ``"flops"``.
 """
 
 import json
@@ -74,10 +75,10 @@ except ModuleNotFoundError:  # fallback → very small zero-predictor
             return _StubOutput(sample=torch.zeros_like(x) * self.dummy)
 
 # -----------------------------------------------------------------------------
-# Path constants (iteration 78)
+# Path constants (iteration 79)
 # -----------------------------------------------------------------------------
 
-ROOT_RESULTS_DIR = pathlib.Path(".research/iteration78").resolve()
+ROOT_RESULTS_DIR = pathlib.Path(".research/iteration79").resolve()
 ROOT_RESULTS_DIR.mkdir(parents=True, exist_ok=True)
 
 # -----------------------------------------------------------------------------
@@ -201,14 +202,16 @@ def _make_figures_dir() -> pathlib.Path:
 def _extract_pflops(trace_path: pathlib.Path, profiler_batches: int) -> float:  # noqa: C901
     """Extract aggregated FLOPs directly from the raw Chrome-trace file.
 
-    Reading the file as *text* with ``utf-8`` encoding occasionally fails when
-    PyTorch embeds non-UTF-8 bytes in the call-stack field.  A robust and much
-    cheaper alternative is to operate on the raw ``bytes`` buffer and simply
-    sum every numeric value that follows the key ``"flops":``.
+    The PyTorch JSON trace may expose the counter under keys such as
+    ``"FLOPs"``, ``"FLOPS"`` or ``"FLOPs (G)"``.  We therefore match the key in a
+    *case-insensitive* fashion and allow arbitrary characters between ``FLOPs``
+    and the closing quote.
     """
 
-    # Regex compiled once (bytes pattern – no need for decoding)
-    _FLOPS_RE = re.compile(rb'"flops"\s*:\s*([0-9]+(?:\.[0-9eE+-]*)?)')
+    # Compile once per function call (cheap) – ignore case & accept variants
+    _FLOPS_RE = re.compile(
+        rb'"FLOPs[^"]*"\s*:\s*([0-9]+(?:\.[0-9eE+-]*)?)', re.IGNORECASE
+    )
 
     try:
         blob = trace_path.read_bytes()
@@ -217,7 +220,9 @@ def _extract_pflops(trace_path: pathlib.Path, profiler_batches: int) -> float:  
 
     matches = _FLOPS_RE.findall(blob)
     if not matches:
-        raise RuntimeError(f"No FLOPs information found in profiler trace {trace_path}.")
+        raise RuntimeError(
+            f"No FLOPs information found in profiler trace {trace_path}."
+        )
 
     pflops = sum(float(m.decode("ascii")) for m in matches)
     # Convert to PFLOPs and normalise per iteration
@@ -240,7 +245,7 @@ def run_single(cfg: dict, seed: int, out_dir: pathlib.Path) -> Dict[str, Any]:
     # Data
     # ------------------------------------------------------------------
     batch_size = cfg["training"]["global_batch"]
-    train_dl, val_dl = build_dataloaders(cfg["dataset"], batch_size, seed)  # noqa: F841 – val_dl kept for parity
+    train_dl, val_dl = build_dataloaders(cfg["dataset"], batch_size, seed)  # noqa: F841 – val_dl kept
 
     figs_dir = _make_figures_dir()
 
