@@ -1,0 +1,91 @@
+Using CPython 3.11.13
+Creating virtual environment at: .venv
+Resolved 77 packages in 96ms
+Installed 69 packages in 4.56s
+ + accelerate==1.8.1
+ + aiohappyeyeballs==2.6.1
+ + aiohttp==3.12.15
+ + aiosignal==1.4.0
+ + attrs==25.3.0
+ + certifi==2025.8.3
+ + charset-normalizer==3.4.3
+ + contourpy==1.3.3
+ + cycler==0.12.1
+ + datasets==4.0.0
+ + diffusers==0.35.1
+ + dill==0.3.8
+ + filelock==3.19.1
+ + fonttools==4.59.2
+ + frozenlist==1.7.0
+ + fsspec==2025.3.0
+ + hf-xet==1.1.9
+ + huggingface-hub==0.34.4
+ + idna==3.10
+ + importlib-metadata==8.7.0
+ + jinja2==3.1.6
+ + kiwisolver==1.4.9
+ + markupsafe==3.0.2
+ + matplotlib==3.10.6
+ + mpmath==1.3.0
+ + multidict==6.6.4
+ + multiprocess==0.70.16
+ + networkx==3.5
+ + numpy==2.3.2
+ + nvidia-cublas-cu12==12.4.5.8
+ + nvidia-cuda-cupti-cu12==12.4.127
+ + nvidia-cuda-nvrtc-cu12==12.4.127
+ + nvidia-cuda-runtime-cu12==12.4.127
+ + nvidia-cudnn-cu12==9.1.0.70
+ + nvidia-cufft-cu12==11.2.1.3
+ + nvidia-curand-cu12==10.3.5.147
+ + nvidia-cusolver-cu12==11.6.1.9
+ + nvidia-cusparse-cu12==12.3.1.170
+ + nvidia-nccl-cu12==2.21.5
+ + nvidia-nvjitlink-cu12==12.4.127
+ + nvidia-nvtx-cu12==12.4.127
+ + packaging==25.0
+ + pandas==2.3.2
+ + pillow==11.3.0
+ + propcache==0.3.2
+ + psutil==7.0.0
+ + pyarrow==21.0.0
+ + pyparsing==3.2.3
+ + python-dateutil==2.9.0.post0
+ + pytz==2025.2
+ + pyyaml==6.0.2
+ + regex==2025.9.1
+ + requests==2.32.5
+ + safetensors==0.6.2
+ + scipy==1.16.1
+ + seaborn==0.13.2
+ + six==1.17.0
+ + sympy==1.13.1
+ + torch==2.5.1
+ + torch-fidelity==0.3.0
+ + torchvision==0.20.1
+ + tqdm==4.67.1
+ + triton==3.1.0
+ + typing-extensions==4.15.0
+ + tzdata==2025.2
+ + urllib3==2.5.0
+ + xxhash==3.5.0
+ + yarl==1.20.1
+ + zipp==3.23.0
+Generating train split:   0%|          | 0/50000 [00:00<?, ? examples/s]Generating train split:   1%|          | 400/50000 [00:00<00:16, 2989.17 examples/s]Generating train split:   2%|▏         | 1000/50000 [00:00<00:12, 3967.66 examples/s]Generating train split:   3%|▎         | 1600/50000 [00:00<00:10, 4546.90 examples/s]Generating train split:   5%|▍         | 2300/50000 [00:00<00:09, 5067.89 examples/s]Generating train split:   6%|▌         | 3000/50000 [00:00<00:09, 5116.66 examples/s]Generating train split:   7%|▋         | 3700/50000 [00:00<00:09, 5074.44 examples/s]Generating train split:   9%|▉         | 4747/50000 [00:01<00:23, 1957.59 examples/s]Generating train split:  11%|█         | 5447/50000 [00:01<00:19, 2300.69 examples/s]Generating train split:  12%|█▏        | 6147/50000 [00:02<00:16, 2633.66 examples/s]Generating train split:  13%|█▎        | 6747/50000 [00:02<00:14, 3028.53 examples/s]Generating train split:  15%|█▍        | 7347/50000 [00:02<00:12, 3371.51 examples/s]Generating train split:  17%|█▋        | 8394/50000 [00:02<00:10, 4093.05 examples/s]Generating train split:  18%|█▊        | 9194/50000 [00:02<00:08, 4791.17 examples/s]Generating train split:  21%|██        | 10294/50000 [00:03<00:15, 2591.92 examples/s]Generating train split:  22%|██▏       | 10894/50000 [00:03<00:13, 2855.92 examples/s]Generating train split:  23%|██▎       | 11640/50000 [00:03<00:11, 3330.72 examples/s]Generating train split:  25%|██▌       | 12640/50000 [00:03<00:08, 4279.20 examples/s]Generating train split:  27%|██▋       | 13440/50000 [00:03<00:07, 4748.82 examples/s]Generating train split:  29%|██▉       | 14640/50000 [00:04<00:16, 2188.91 examples/s]Generating train split:  31%|███       | 15486/50000 [00:05<00:12, 2658.71 examples/s]Generating train split:  33%|███▎      | 16586/50000 [00:05<00:10, 3326.94 examples/s]Generating train split:  35%|███▌      | 17686/50000 [00:05<00:07, 4252.48 examples/s]Generating train split:  37%|███▋      | 18486/50000 [00:05<00:08, 3931.38 examples/s]Generating train split:  38%|███▊      | 19232/50000 [00:06<00:15, 2040.83 examples/s]Generating train split:  39%|███▉      | 19732/50000 [00:06<00:13, 2270.29 examples/s]Generating train split:  41%|████      | 20532/50000 [00:06<00:11, 2655.75 examples/s]Generating train split:  42%|████▏     | 21032/50000 [00:06<00:10, 2719.99 examples/s]Generating train split:  43%|████▎     | 21632/50000 [00:07<00:09, 3041.67 examples/s]Generating train split:  45%|████▍     | 22432/50000 [00:07<00:07, 3584.18 examples/s]Generating train split:  46%|████▋     | 23178/50000 [00:07<00:13, 1916.69 examples/s]Generating train split:  49%|████▉     | 24478/50000 [00:08<00:08, 2979.40 examples/s]Generating train split:  50%|█████     | 25078/50000 [00:08<00:07, 3256.27 examples/s]Generating train split:  52%|█████▏    | 25978/50000 [00:08<00:05, 4037.09 examples/s]Generating train split:  54%|█████▍    | 27024/50000 [00:08<00:04, 4887.05 examples/s]Generating train split:  56%|█████▌    | 27924/50000 [00:09<00:08, 2734.90 examples/s]Generating train split:  59%|█████▉    | 29424/50000 [00:09<00:05, 4114.86 examples/s]Generating train split:  62%|██████▏   | 30870/50000 [00:09<00:03, 5497.49 examples/s]Generating train split:  64%|██████▎   | 31870/50000 [00:09<00:03, 5995.17 examples/s]Generating train split:  67%|██████▋   | 33470/50000 [00:10<00:04, 3417.54 examples/s]Generating train split:  69%|██████▉   | 34570/50000 [00:10<00:03, 4077.64 examples/s]Generating train split:  71%|███████▏  | 35716/50000 [00:10<00:03, 4631.24 examples/s]Generating train split:  74%|███████▍  | 36916/50000 [00:10<00:02, 5265.28 examples/s]Generating train split:  76%|███████▌  | 37916/50000 [00:11<00:03, 3054.92 examples/s]Generating train split:  78%|███████▊  | 38762/50000 [00:11<00:03, 3469.93 examples/s]Generating train split:  80%|███████▉  | 39762/50000 [00:11<00:02, 4150.29 examples/s]Generating train split:  82%|████████▏ | 40862/50000 [00:11<00:01, 4660.75 examples/s]Generating train split:  83%|████████▎ | 41662/50000 [00:12<00:03, 2597.54 examples/s]Generating train split:  85%|████████▌ | 42508/50000 [00:12<00:02, 3121.08 examples/s]Generating train split:  87%|████████▋ | 43408/50000 [00:12<00:01, 3842.68 examples/s]Generating train split:  88%|████████▊ | 44108/50000 [00:12<00:01, 4081.76 examples/s]Generating train split:  90%|████████▉ | 44808/50000 [00:13<00:01, 4435.42 examples/s]Generating train split:  91%|█████████ | 45508/50000 [00:14<00:03, 1265.15 examples/s]Generating train split:  93%|█████████▎| 46254/50000 [00:14<00:02, 1528.82 examples/s]Generating train split:  94%|█████████▎| 46754/50000 [00:15<00:01, 1737.70 examples/s]Generating train split:  95%|█████████▌| 47654/50000 [00:15<00:00, 2367.99 examples/s]Generating train split:  97%|█████████▋| 48354/50000 [00:15<00:00, 2792.67 examples/s]Generating train split:  98%|█████████▊| 49054/50000 [00:15<00:00, 3309.24 examples/s]Generating train split: 100%|█████████▉| 49854/50000 [00:16<00:00, 1571.12 examples/s]Generating train split: 100%|██████████| 50000/50000 [00:16<00:00, 2995.82 examples/s]
+Generating validation split:   0%|          | 0/10000 [00:00<?, ? examples/s]Generating validation split:   3%|▎         | 300/10000 [00:00<00:04, 2372.47 examples/s]Generating validation split:  13%|█▎        | 1300/10000 [00:00<00:01, 6100.28 examples/s]Generating validation split:  21%|██        | 2100/10000 [00:00<00:01, 6711.13 examples/s]Generating validation split:  28%|██▊       | 2800/10000 [00:00<00:01, 5992.37 examples/s]Generating validation split:  34%|███▍      | 3434/10000 [00:00<00:01, 5969.24 examples/s]Generating validation split:  44%|████▍     | 4434/10000 [00:00<00:00, 6947.03 examples/s]Generating validation split:  60%|██████    | 6034/10000 [00:02<00:02, 1748.63 examples/s]Generating validation split:  72%|███████▏  | 7167/10000 [00:02<00:01, 2335.49 examples/s]Generating validation split:  81%|████████  | 8067/10000 [00:02<00:00, 2875.53 examples/s]Generating validation split:  89%|████████▊ | 8867/10000 [00:02<00:00, 3110.73 examples/s]Generating validation split:  98%|█████████▊| 9767/10000 [00:04<00:00, 1581.83 examples/s]Generating validation split: 100%|██████████| 10000/10000 [00:04<00:00, 2269.31 examples/s]
+Generating test split:   0%|          | 0/5000 [00:00<?, ? examples/s]Generating test split:   2%|▏         | 100/5000 [00:00<00:21, 232.18 examples/s]Generating test split:  12%|█▏        | 600/5000 [00:00<00:03, 1240.28 examples/s]Generating test split:  16%|█▌        | 800/5000 [00:01<00:09, 439.02 examples/s] Generating test split:  28%|██▊       | 1400/5000 [00:01<00:03, 958.34 examples/s]Generating test split:  46%|████▌     | 2300/5000 [00:01<00:01, 1882.08 examples/s]Generating test split:  58%|█████▊    | 2900/5000 [00:01<00:00, 2434.25 examples/s]Generating test split:  78%|███████▊  | 3900/5000 [00:02<00:00, 3536.79 examples/s]Generating test split:  90%|█████████ | 4500/5000 [00:03<00:00, 1555.07 examples/s]Generating test split: 100%|██████████| 5000/5000 [00:03<00:00, 1479.13 examples/s]
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "/home/toma/actions-runner-2/_work/tanaka-20250906-v6/tanaka-20250906-v6/src/main.py", line 103, in <module>
+    main()
+  File "/home/toma/actions-runner-2/_work/tanaka-20250906-v6/tanaka-20250906-v6/src/main.py", line 76, in main
+    res = run_single(cfg, seed, out_dir)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/toma/actions-runner-2/_work/tanaka-20250906-v6/tanaka-20250906-v6/src/train.py", line 211, in run_single
+    train_dl, val_dl = build_dataloaders(cfg["dataset"], seed)
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/toma/actions-runner-2/_work/tanaka-20250906-v6/tanaka-20250906-v6/src/preprocess.py", line 101, in build_dataloaders
+    batch_size=cfg["global_batch"],
+               ~~~^^^^^^^^^^^^^^^^
+KeyError: 'global_batch'
