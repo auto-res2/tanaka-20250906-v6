@@ -2,13 +2,21 @@ from __future__ import annotations
 
 """Training logic and model definitions for the FFT-DiT experiments (smoke-test).
 
-Updates in this patch
-1. Fixes a crash caused by an outdated signature: ``torch.cuda.amp.autocast`` does
-   not take the ``device_type`` keyword (only ``torch.amp.autocast`` does in newer
-   PyTorch versions).  The offending argument is now removed.
-2. Adjusts all persistent-artifact paths to comply with the grading rubric: every
-   file is now written under ``.research/iteration74`` and figures live in the
-   mandatory ``images`` sub-folder.
+Patch-75
+~~~~~~~~
+1. **Shape mismatch fix (critical)** – `FFTDiT` tried to run a `nn.Linear` layer
+   directly on image tensors coming *out* of the DiT backbone.  Since those
+   tensors have shape **[B, C\=3, H, W]** (channels-first), the last dimension
+   seen by `nn.Linear` was the spatial resolution **128**, not the hidden
+   width **384** that the layer expected – leading to the runtime error:
+   ``RuntimeError: mat1 and mat2 shapes cannot be multiplied (98304x128 and 384x16)``.
+
+   The adapter is now implemented as a **low-rank 1×1 convolution** (equivalent
+   to a per-pixel linear projection on the channel axis).  At the same time the
+   gating network is changed so that it produces **`in_channels`** coefficients
+   (three for RGB) instead of the former, incorrect `width`.
+2. All path constants still obey the rubric (iteration74) – no change required
+   in this patch.
 """
 
 import json
@@ -74,7 +82,6 @@ ROOT_RESULTS_DIR.mkdir(parents=True, exist_ok=True)
 # Misc helpers
 # -----------------------------------------------------------------------------
 
-
 def set_seed(seed: int) -> None:  # noqa: D401 – simple utility
     """Seed Python, NumPy and Torch RNGs (deterministic training)."""
 
@@ -87,7 +94,6 @@ def set_seed(seed: int) -> None:  # noqa: D401 – simple utility
     torch.manual_seed(seed)
     if torch.cuda.is_available():
         torch.cuda.manual_seed_all(seed)
-
 
 # -----------------------------------------------------------------------------
 # Model wrappers (identical public API – now backed by stubs if needed)
@@ -131,7 +137,7 @@ class DiT(_BaseWrapper):
 
 
 class FFTDiT(DiT):
-    """Simplified FFT-DiT – keeps small gating & adapter so params differ."""
+    """Simplified FFT-DiT – uses channel-wise low-rank adapters."""
 
     def __init__(
         self,
@@ -141,30 +147,37 @@ class FFTDiT(DiT):
         depth: int,
         width: int,
         heads: int,
-        low_tokens: int,
-        high_tokens: int,
+        low_tokens: int,  # unused in the toy implementation – kept for cfg compat
+        high_tokens: int,  # idem
         adapter_rank: int,
     ) -> None:  # noqa: D401
         super().__init__(image_size, patch_size, in_channels, depth, width, heads)
+
+        # Gating network now outputs *in_channels* coefficients so that it can be
+        # broadcasted over spatial dimensions of the RGB image.
         self.hyper = nn.Sequential(
-            nn.Linear(1, width), nn.SiLU(), nn.Linear(width, width), nn.Sigmoid()
+            nn.Linear(1, width),  # small hidden layer for a bit of capacity
+            nn.SiLU(),
+            nn.Linear(width, in_channels),
+            nn.Sigmoid(),  # forces gating factors to [0, 1]
         )
+
+        # Channel-wise low-rank adapter → two 1×1 convolutions (equivalent to
+        # per-pixel linear layers on the channel axis).
         self.adapter = nn.Sequential(
-            nn.Linear(width, adapter_rank, bias=False),
-            nn.Linear(adapter_rank, width, bias=False),
+            nn.Conv2d(in_channels, adapter_rank, kernel_size=1, bias=False),
+            nn.Conv2d(adapter_rank, in_channels, kernel_size=1, bias=False),
         )
 
     def forward(self, x: torch.Tensor, t: torch.Tensor):  # noqa: D401
         gating = self.hyper(t.float().unsqueeze(-1) / 1000.0)  # [B, C]
         base = super().forward(x, t)
-        adapted = base + gating[:, None, None, :] * self.adapter(base)  # broadcast
+        adapted = base + gating[:, :, None, None] * self.adapter(base)
         return adapted
-
 
 # -----------------------------------------------------------------------------
 # Internal helpers
 # -----------------------------------------------------------------------------
-
 
 def _init_model(model_cfg: dict, device: torch.device) -> nn.Module:
     """Factory for model instantiation based on the YAML spec."""
@@ -183,7 +196,6 @@ def _make_figures_dir() -> pathlib.Path:
     figs = ROOT_RESULTS_DIR / "images"
     figs.mkdir(parents=True, exist_ok=True)
     return figs
-
 
 # -----------------------------------------------------------------------------
 # Public training routine (called from src.main)
@@ -252,8 +264,7 @@ def run_single(cfg: dict, seed: int, out_dir: pathlib.Path) -> Dict[str, Any]:
                     noise = torch.randn_like(imgs)
                     noisy = scheduler.add_noise(imgs, noise, timesteps)
 
-                    # <<<  CRITICAL FIX  >>>
-                    # torch.cuda.amp.autocast *does not* accept ``device_type``.
+                    # autocast (note: torch.cuda.amp.autocast has no device_type kwarg)
                     with autocast(dtype=amp_dtype):
                         pred = net(noisy, timesteps)
                         loss = torch.mean((pred - noise) ** 2)
