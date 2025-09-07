@@ -1,0 +1,26 @@
+{
+  "fft_dit_xs": {
+    "seed": 17,
+    "final_fid": 0.5334482070852715,
+    "inception": 1.1012667943229282,
+    "loss_last": 0.9995009899139404,
+    "pflops_per_iter": NaN,
+    "figures": [
+      "/home/toma/actions-runner-2/_work/tanaka-20250906-v6/tanaka-20250906-v6/.research/iteration80/images/training_loss_fft_dit_xs.pdf",
+      "/home/toma/actions-runner-2/_work/tanaka-20250906-v6/tanaka-20250906-v6/.research/iteration80/images/fid_fft_dit_xs.pdf"
+    ],
+    "trace": "/home/toma/actions-runner-2/_work/tanaka-20250906-v6/tanaka-20250906-v6/.research/iteration80/trace_fft_dit_xs.json"
+  },
+  "dit_xs": {
+    "seed": 17,
+    "final_fid": 0.5227875341569117,
+    "inception": 1.1049279459561177,
+    "loss_last": 0.9997595548629761,
+    "pflops_per_iter": NaN,
+    "figures": [
+      "/home/toma/actions-runner-2/_work/tanaka-20250906-v6/tanaka-20250906-v6/.research/iteration80/images/training_loss_dit_xs.pdf",
+      "/home/toma/actions-runner-2/_work/tanaka-20250906-v6/tanaka-20250906-v6/.research/iteration80/images/fid_dit_xs.pdf"
+    ],
+    "trace": "/home/toma/actions-runner-2/_work/tanaka-20250906-v6/tanaka-20250906-v6/.research/iteration80/trace_dit_xs.json"
+  }
+}
