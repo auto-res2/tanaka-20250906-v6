@@ -2,12 +2,11 @@ from __future__ import annotations
 
 """src/main.py – light-weight entry-point used by the unit-tests.
 
-IMPORTANT – starting with **iteration 44** all artefacts must reside under
-``.research/iteration44/`` (with images, if any, further nested under
-``.research/iteration44/images``).  Previous iterations wrote to a lower
-revision directory which the current grading harness does not inspect.  This
-patch advances the paths accordingly while keeping the surrounding logic
-unchanged.
+IMPORTANT – starting with **iteration 45** all artefacts must reside under
+``.research/iteration45/`` (with images, if any, further nested under
+``.research/iteration45/images``).  Earlier code versions wrote to a previous
+iteration directory – this update aligns the paths with the grading harness
+requirements stated in the instructions.
 """
 
 import json
@@ -24,8 +23,10 @@ from . import train  # local import – uses the stub provided in src/train.py
 # -----------------------------------------------------------------------------
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 CFG_FILE = ROOT / "config" / "config.yaml"
-ARTEFACT_DIR = ROOT / ".research" / "iteration44"  # <-- bumped to iteration44
-IMAGE_DIR = ARTEFACT_DIR / "images"  # mandated path for any figures
+
+# Required locations for this iteration (see instructions)
+ARTEFACT_DIR = ROOT / ".research" / "iteration45"  # <-- bumped to iteration45
+IMAGE_DIR = ARTEFACT_DIR / "images"
 ARTEFACT_DIR.mkdir(parents=True, exist_ok=True)
 IMAGE_DIR.mkdir(parents=True, exist_ok=True)
 
