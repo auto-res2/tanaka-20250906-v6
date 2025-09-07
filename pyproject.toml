@@ -1,22 +1,25 @@
-[project]
-name = "fft-dit-experiments"
-version = "0.2.0"
-description = "Re-implementation of FFT-DiT experiments (refactored)"
-requires-python = ">=3.10"
-dependencies = [
-    "torch>=2.2,<2.9",
-    "torchvision>=0.17,<0.21",
-    "diffusers>=0.33,<0.36",
-    "torch-fidelity>=0.3,<1.0",
-    "datasets>=4.0,<4.2",
-    "accelerate>=1.5,<1.9",
-    "tqdm",
-    "pyyaml",
-    "matplotlib",
-    "seaborn",
-    "numpy",
-    "requests",
+[tool.poetry]
+name = "fft_dit_experiments"
+version = "0.1.0"
+description = "Research code for FFT-DiT diffusion experiments"
+authors = ["Researcher <research@example.com>"]
+readme = "README.md"
+packages = [
+    { include = "src" }
 ]
 
-[tool.setuptools.packages.find]
-where = ["src"]
+[tool.poetry.dependencies]
+python = ">=3.9,<3.12"
+torch = "^2.0"
+torchvision = "^0.15"
+diffusers = "^0.24"
+datasets = "^2.18"
+torch-fidelity = "^0.3"
+numpy = "^1.25"
+pyyaml = "^6.0"
+matplotlib = "^3.8"
+seaborn = "^0.13"
+
+[build-system]
+requires = ["poetry-core>=1.5"]
+build-backend = "poetry.core.masonry.api"

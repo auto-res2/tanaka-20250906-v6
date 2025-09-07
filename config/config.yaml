@@ -1,52 +1,29 @@
-run_id: exp1_ci_smoke_test
-seed_list: [11, 17, 23]
-output_root: .research
-
-hardware:
-  device: cuda  # will fall back to cpu if CUDA unavailable but will ABORT (strict rule)
-  mixed_precision: bf16
-  profiler_batches: 50
-
-dataset:
-  name: imagenet-mini
-  hf_repo: timm/mini-imagenet
-  img_size: 128
-  val_split: 0.1  # 10 % held-out for FID computation reference statistics
-  sha256_file: data/sha256.txt
-
-training:
-  epochs: 2
-  global_batch: 256
-  lr: 1.5e-4
-  weight_decay: 0.02
-  warmup_steps: 300
-  ema_decay: 0.9999
-  assert_fid_lt: 500
-
-eval:
-  samples: 2000
-  ddim_steps: 20
-  ddim_eta: 0.0
-
-models:
-  fft_dit_xs:
-    type: fft_dit
-    params:
-      image_size: 128
-      patch_size: 16
-      in_channels: 3
-      depth: 4
-      width: 384
-      heads: 6
-      low_tokens: 32
-      high_tokens: 32
-      adapter_rank: 16
-  dit_xs:
-    type: dit
-    params:
-      image_size: 128
-      patch_size: 16
-      in_channels: 3
-      depth: 4
-      width: 384
-      heads: 6
+experiments:
+  exp1_ci:
+    seeds: [11, 17, 23]
+    hardware:
+      profiler_batches: 50
+    dataset:
+      hf_repo: timm/mini-imagenet
+      img_size: 128
+    training:
+      epochs: 2
+      batch: 256
+      lr: 1.5e-4
+      wd: 0.02
+      ema: 0.9999
+    eval:
+      n_gen: 2000
+      ddim_steps: 20
+    asserts:
+      fid_epoch1_lt: 400
+    model:
+      type: fft_dit
+      params:
+        sample_size: 128
+        patch_size: 16
+        in_channels: 3
+        hidden_size: 384
+        depth: 4
+        num_heads: 6
+        adapter_rank: 16
