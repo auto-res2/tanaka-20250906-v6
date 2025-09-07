@@ -1,4 +1,3 @@
-"""src/preprocess.py – dataset downloading, preprocessing helpers (fixed paths)"""
 import pathlib, random, yaml
 from typing import Tuple
 
@@ -71,4 +70,7 @@ def set_seed(seed: int):
     import numpy as np
     np.random.seed(seed)
     torch.manual_seed(seed)
-    torch.cuda.manual_seed_all(seed)
+    # Only call CUDA seeding helpers if a CUDA device is actually present to avoid
+    # runtime errors in CPU-only environments.
+    if torch.cuda.is_available():
+        torch.cuda.manual_seed_all(seed)
