@@ -2,11 +2,11 @@ from __future__ import annotations
 
 """src/main.py – light-weight entry-point used by the unit-tests.
 
-IMPORTANT – the rubric for the **current iteration (41)** mandates that *all* artefacts
-are stored under ``.research/iteration41/`` (with images, if any, further nested
-under ``.research/iteration41/images``).  This file therefore mirrors the previous
-implementation but writes JSON outputs to the new location so the test harness can
-locate them.
+IMPORTANT – the rubric for **iteration 42** mandates that *all* artefacts are
+stored under ``.research/iteration42/`` (with images, if any, further nested
+under ``.research/iteration42/images``).  This file therefore mirrors the
+previous implementation but writes JSON outputs to the new location so the test
+harness can locate them.
 """
 
 import json
@@ -23,7 +23,7 @@ from . import train  # local import – uses the stub provided in src/train.py
 # -----------------------------------------------------------------------------
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 CFG_FILE = ROOT / "config" / "config.yaml"
-ARTEFACT_DIR = ROOT / ".research" / "iteration41"  # <-- updated to iteration41
+ARTEFACT_DIR = ROOT / ".research" / "iteration42"  # <-- updated to iteration42
 IMAGE_DIR = ARTEFACT_DIR / "images"  # mandated path for any figures
 ARTEFACT_DIR.mkdir(parents=True, exist_ok=True)
 IMAGE_DIR.mkdir(parents=True, exist_ok=True)
