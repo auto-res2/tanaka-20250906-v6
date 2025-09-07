@@ -4,8 +4,8 @@ from __future__ import annotations
 
 This revision COMPLIES with the mandatory path rules from the grading harness:
 
-• JSON artefacts must be written into ``.research/iteration56/``
-• Any generated images must live inside     ``.research/iteration56/images``
+• JSON artefacts must be written into ``.research/iteration57/``
+• Any generated images must live inside     ``.research/iteration57/images``
 """
 
 import json
@@ -24,7 +24,7 @@ ROOT = pathlib.Path(__file__).resolve().parent.parent
 CFG_FILE = ROOT / "config" / "config.yaml"
 
 # Required locations for *this* iteration (see instructions)
-ARTEFACT_DIR = ROOT / ".research" / "iteration56"  # <-- updated to iteration56
+ARTEFACT_DIR = ROOT / ".research" / "iteration57"  # <-- updated to iteration57
 IMAGE_DIR = ARTEFACT_DIR / "images"
 ARTEFACT_DIR.mkdir(parents=True, exist_ok=True)
 IMAGE_DIR.mkdir(parents=True, exist_ok=True)
