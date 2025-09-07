@@ -2,9 +2,9 @@ from __future__ import annotations
 
 """src/main.py – light-weight entry-point used by the unit-tests.
 
-IMPORTANT – starting with **iteration 45** all artefacts must reside under
-``.research/iteration45/`` (with images, if any, further nested under
-``.research/iteration45/images``).  Earlier code versions wrote to a previous
+IMPORTANT – starting with **iteration 46** all artefacts must reside under
+``.research/iteration46/`` (with images, if any, further nested under
+``.research/iteration46/images``).  Earlier code versions wrote to a previous
 iteration directory – this update aligns the paths with the grading harness
 requirements stated in the instructions.
 """
@@ -25,7 +25,7 @@ ROOT = pathlib.Path(__file__).resolve().parent.parent
 CFG_FILE = ROOT / "config" / "config.yaml"
 
 # Required locations for this iteration (see instructions)
-ARTEFACT_DIR = ROOT / ".research" / "iteration45"  # <-- bumped to iteration45
+ARTEFACT_DIR = ROOT / ".research" / "iteration46"  # <-- bumped to iteration46
 IMAGE_DIR = ARTEFACT_DIR / "images"
 ARTEFACT_DIR.mkdir(parents=True, exist_ok=True)
 IMAGE_DIR.mkdir(parents=True, exist_ok=True)
