@@ -6,7 +6,9 @@ import tempfile
 from typing import Tuple
 
 import torch
-from diffusers import DDIMScheduler, DiTPipeline
+# Similar to the train.py fix – DiTPipeline is not re-exported at the top level
+from diffusers import DDIMScheduler
+from diffusers.pipelines.dit import DiTPipeline
 from torch_fidelity import calculate_metrics
 from tqdm.auto import tqdm
 

@@ -10,11 +10,12 @@ from typing import Dict
 
 import yaml
 
-from .train import run_single
+from .train import ROOT_RESULTS_DIR, run_single
 
 # -----------------------------------------------------------------------------
 # Environment logging (kept here to avoid an extra file)
 # -----------------------------------------------------------------------------
+
 
 def _log_environment(out_path: pathlib.Path) -> None:
     """Write minimal reproducibility snapshot (git hash, torch/cuDNN versions…)."""
@@ -59,7 +60,11 @@ def main() -> None:  # noqa: D401
     cfg = _load_cfg()
 
     run_id = cfg["run_id"] + "_" + datetime.utcnow().strftime("%Y%m%dT%H%M%SZ")
-    out_dir = pathlib.Path(cfg["output_root"]) / run_id
+
+    # ------------------------------------------------------------------
+    # All outputs – JSON, traces, figs – must live under .research/iteration71/
+    # ------------------------------------------------------------------
+    out_dir = ROOT_RESULTS_DIR  # fixed path as per instruction
     out_dir.mkdir(parents=True, exist_ok=True)
 
     _log_environment(out_dir / "env.json")
