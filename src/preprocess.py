@@ -1,6 +1,13 @@
 from __future__ import annotations
 
-"""Data-loading & pre-processing helpers (mini-ImageNet from HuggingFace)."""
+"""Data-loading & pre-processing helpers (mini-ImageNet from HuggingFace).
+
+This revision modifies `build_dataloaders` so that the function no longer
+expects the *global batch size* to be present inside the `dataset` subsection of
+the YAML.  Instead, the batch size is now supplied explicitly by the caller
+(`train.run_single`) which retrieves it from the `training` section.  This fixes
+`KeyError: 'global_batch'` observed during CI.
+"""
 
 import pathlib
 from typing import Tuple
@@ -77,34 +84,45 @@ class _HFDataset(Dataset):
 # -----------------------------------------------------------------------------
 
 
-def build_dataloaders(cfg: dict, seed: int) -> Tuple[DataLoader, DataLoader]:
-    """Download (if needed) and build deterministic train/val dataloaders."""
+def build_dataloaders(dataset_cfg: dict, batch_size: int, seed: int) -> Tuple[DataLoader, DataLoader]:
+    """Download (if needed) and build deterministic train/val dataloaders.
+
+    Parameters
+    ----------
+    dataset_cfg : dict
+        The `dataset` subsection of the YAML config (contains repository name,
+        image size, etc.).
+    batch_size : int
+        Global batch size taken from `training.global_batch` in the config.
+    seed : int
+        Seed used for deterministic train/validation splitting.
+    """
 
     try:
-        ds = hfd.load_dataset(cfg["hf_repo"], cache_dir=str(DATA_DIR))
+        ds = hfd.load_dataset(dataset_cfg["hf_repo"], cache_dir=str(DATA_DIR))
     except Exception as e:  # pragma: no cover – network issues
         raise DataDownloadError(f"Could not download dataset: {e}") from e
 
     # Optional SHA-256 verification (offline integrity check)
-    sha_file = cfg.get("sha256_file")
+    sha_file = dataset_cfg.get("sha256_file")
     if sha_file and pathlib.Path(sha_file).exists():
         for line in pathlib.Path(sha_file).read_text().splitlines():
             expected, rel = line.strip().split()[:2]
             _verify_sha256(DATA_DIR / rel, expected)
 
-    split = ds["train"].train_test_split(test_size=cfg["val_split"], seed=seed)
-    train_ds = _HFDataset(split["train"], img_size=cfg["img_size"])
-    val_ds = _HFDataset(split["test"], img_size=cfg["img_size"])
+    split = ds["train"].train_test_split(test_size=dataset_cfg["val_split"], seed=seed)
+    train_ds = _HFDataset(split["train"], img_size=dataset_cfg["img_size"])
+    val_ds = _HFDataset(split["test"], img_size=dataset_cfg["img_size"])
 
     train_loader = DataLoader(
         train_ds,
-        batch_size=cfg["global_batch"],
+        batch_size=batch_size,
         shuffle=True,
         num_workers=8,
         pin_memory=True,
         drop_last=True,
     )
     val_loader = DataLoader(
-        val_ds, batch_size=cfg["global_batch"], shuffle=False, num_workers=4, pin_memory=True
+        val_ds, batch_size=batch_size, shuffle=False, num_workers=4, pin_memory=True
     )
     return train_loader, val_loader
